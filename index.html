@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Missing Recipe — Grain Test Kitchen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0d0d0d;
+      --white: #eae6e1;
+      --yellow: #fecc07;
+      --ink: #1a1a1a;
+      --faded: #8a8070;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--white);
+      color: var(--black);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .notebook-lines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: repeating-linear-gradient(
+        transparent, transparent 31px,
+        rgba(0,0,0,0.05) 31px, rgba(0,0,0,0.05) 32px
+      );
+    }
+
+    /* ─── LANDING ─── */
+    #landing {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      gap: 2rem;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    #landing.hidden { display: none; }
+
+    .stamp-label {
+      font-family: 'Special Elite', cursive;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--faded);
+      border: 1px solid var(--faded);
+      padding: 0.3rem 0.8rem;
+      transform: rotate(-1deg);
+    }
+
+    .heading {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1.8rem, 6vw, 2.6rem);
+      line-height: 1.2;
+      text-align: center;
+      color: var(--ink);
+      max-width: 420px;
+    }
+
+    .heading em { font-style: italic; color: var(--faded); }
+
+    .subtext {
+      font-size: 0.95rem;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.7;
+      max-width: 340px;
+      font-style: italic;
+    }
+
+    .input-wrap {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .input-field {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--black);
+      padding: 0.75rem 0.25rem;
+      font-family: 'Special Elite', cursive;
+      font-size: 1.1rem;
+      color: var(--ink);
+      text-align: center;
+      outline: none;
+      letter-spacing: 0.05em;
+      transition: border-color 0.2s;
+    }
+
+    .input-field::placeholder { color: #bbb5aa; font-style: italic; }
+    .input-field:focus { border-color: var(--yellow); }
+    .input-field.error { border-color: #c0392b; animation: shake 0.3s ease; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .error-msg {
+      font-size: 0.78rem;
+      color: #c0392b;
+      font-style: italic;
+      opacity: 0;
+      transition: opacity 0.2s;
+      min-height: 1rem;
+    }
+    .error-msg.visible { opacity: 1; }
+
+    .submit-btn {
+      background: var(--black);
+      color: var(--white);
+      border: none;
+      padding: 0.85rem 2.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .submit-btn:hover { background: var(--ink); transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+
+    .footer-note {
+      font-size: 0.72rem;
+      color: var(--faded);
+      font-style: italic;
+    }
+
+    /* ─── REWARD FLOW ─── */
+    #rewardFlow { display: none; position: relative; z-index: 1; }
+    #rewardFlow.active { display: block; }
+
+    /* ─── STAMP SECTION ─── */
+    #stampSection {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .stamp-recovered {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(2rem, 7vw, 3.5rem);
+      color: var(--black);
+      border: 3px solid var(--black);
+      padding: 0.5rem 1.5rem;
+      transform: rotate(-2deg);
+      letter-spacing: 0.1em;
+      position: relative;
+      animation: stampIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+      animation-delay: 0.15s;
+    }
+    .stamp-recovered::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid var(--black);
+    }
+
+    @keyframes stampIn {
+      from { opacity: 0; transform: rotate(-2deg) scale(1.5); }
+      to   { opacity: 1; transform: rotate(-2deg) scale(1); }
+    }
+
+    .stamp-msg {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      color: var(--ink);
+      max-width: 400px;
+      line-height: 1.5;
+      animation: fadeUp 0.5s ease both;
+      animation-delay: 0.5s;
+      opacity: 0;
+    }
+
+    .stamp-sub {
+      font-size: 0.9rem;
+      color: var(--faded);
+      font-style: italic;
+      animation: fadeUp 0.5s ease both;
+      animation-delay: 0.7s;
+      opacity: 0;
+    }
+
+    .scroll-cue {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: var(--faded);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      animation: fadeUp 0.5s ease both, bob 1.8s ease-in-out infinite;
+      animation-delay: 1s, 1.5s;
+      opacity: 0;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(5px); }
+    }
+
+    /* ─── RECIPES SECTION ─── */
+    #recipesSection {
+      padding: 4rem 2rem 5rem;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5rem;
+    }
+
+    .section-label {
+      font-family: 'Special Elite', cursive;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--faded);
+      text-align: center;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .recipe-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .recipe-entry.visible { opacity: 1; transform: translateY(0); }
+
+    .recipe-number {
+      font-family: 'Special Elite', cursive;
+      font-size: 0.72rem;
+      color: var(--faded);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .recipe-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      filter: grayscale(10%);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* ─── REWARD SECTION ─── */
+    #rewardSection {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 4rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .reward-dish-name {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      color: var(--ink);
+      max-width: 400px;
+      line-height: 1.4;
+    }
+
+    .reward-msg {
+      font-size: 0.9rem;
+      color: var(--faded);
+      font-style: italic;
+      line-height: 1.9;
+      max-width: 360px;
+    }
+
+    .reward-pill {
+      background: var(--yellow);
+      color: var(--black);
+      font-family: 'Special Elite', cursive;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.5rem 1.5rem;
+      transform: rotate(1deg);
+      display: inline-block;
+    }
+
+    .cta-btn {
+      background: var(--black);
+      color: var(--white);
+      border: none;
+      padding: 0.85rem 2.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .reward-code {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      letter-spacing: 0.2em;
+      color: var(--black);
+      background: var(--yellow);
+      padding: 0.6rem 1.5rem;
+      transform: rotate(-1deg);
+      display: inline-block;
+    }
+
+    .reward-terms {
+      font-size: 0.78rem;
+      color: var(--faded);
+      font-style: italic;
+      line-height: 1.9;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .cta-btn:hover { background: var(--ink); transform: translateY(-1px); }
+
+    .grain-footer {
+      padding: 2rem;
+      text-align: center;
+      font-family: 'Special Elite', cursive;
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--faded);
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="notebook-lines"></div>
+
+  <!-- LANDING -->
+  <section id="landing">
+    <div class="stamp-label">Grain Test Kitchen</div>
+    <h1 class="heading">You found a<br><em>missing recipe.</em></h1>
+    <p class="subtext">Chef Nic's been looking everywhere. Which one did you find?</p>
+    <div class="input-wrap">
+      <input class="input-field" id="recipeInput" type="text" placeholder="type the dish name here…" autocomplete="off" spellcheck="false" />
+      <div class="error-msg" id="errorMsg">That doesn't match any of our missing recipes.</div>
+      <button class="submit-btn" id="submitBtn">Return the recipe</button>
+    </div>
+    <p class="footer-note">grain.com.sg/missing-recipes</p>
+  </section>
+
+  <!-- REWARD FLOW -->
+  <div id="rewardFlow">
+
+    <!-- Stamp -->
+    <section id="stampSection">
+      <div class="stamp-label">Grain Test Kitchen</div>
+      <div class="stamp-recovered">Recipe Returned.</div>
+      <p class="stamp-msg" id="stampDishName"></p>
+      <p class="stamp-sub">Chef Nic is relieved.</p>
+      <p class="scroll-cue">↓ &nbsp; scroll to see what you've unlocked</p>
+    </section>
+
+    <!-- Recipe pages -->
+    <section id="recipesSection">
+      <div class="section-label">The missing recipes — now returned</div>
+
+      <div class="recipe-entry">
+        <div class="recipe-number">01 — The PB&amp;J</div>
+        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="The PB&J recipe page" />
+      </div>
+
+      <div class="recipe-entry">
+        <div class="recipe-number">02 — Loaded Antipasti Focaccia</div>
+        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Loaded Antipasti Focaccia recipe page" />
+      </div>
+
+      <div class="recipe-entry">
+        <div class="recipe-number">03 — Confit Salmon Cubes and Pumpkin</div>
+        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Confit Salmon Cubes and Pumpkin recipe page" />
+      </div>
+
+      <div class="recipe-entry">
+        <div class="recipe-number">04 — Wok-Fried Lotus Root and Black Fungus</div>
+        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Wok-Fried Lotus Root and Black Fungus recipe page" />
+      </div>
+
+      <div class="recipe-entry">
+        <div class="recipe-number">05 — Sober San Bei Chicken</div>
+        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Sober San Bei Chicken recipe page" />
+      </div>
+    </section>
+
+    <!-- Reward -->
+    <section id="rewardSection">
+      <div class="stamp-label">Your reward</div>
+      <p class="reward-msg">
+        Thanks to you, this dish is making it to June's menu launch.<br>
+        You've earned yourself a little something.
+      </p>
+      <div class="reward-code">FOUNDIT10</div>
+      <p class="reward-terms">
+        <strong>10% off catering, capped at $100.</strong><br>
+        Valid for events in June and July.<br>
+        Enter code at checkout. Not valid with ongoing promotions.
+      </p>
+      <a href="https://grain.com.sg/catering" class="cta-btn">Book your buffet</a>
+    </section>
+
+    <footer class="grain-footer">Grain<br>grain.com.sg/missing-recipes</footer>
+  </div>
+
+  <script>
+    const RECIPES = [
+      { keys: ["the pb&j","pb&j","pb & j","pb and j","the pb and j"], display: "The PB&J" },
+      { keys: ["loaded antipasti focaccia","antipasti focaccia","loaded anti-pasti focaccia","anti-pasti focaccia","loaded anti-pasta focaccia","anti-pasta focaccia","loaded antipasta focaccia","antipasta focaccia"], display: "Loaded Antipasti Focaccia" },
+      { keys: ["confit salmon cubes and pumpkin","confit salmon and pumpkin","confit salmon"], display: "Confit Salmon Cubes and Pumpkin" },
+      { keys: ["wok-fried lotus root and black fungus","wok fried lotus root and black fungus","lotus root and black fungus","lotus root"], display: "Wok-Fried Lotus Root and Black Fungus" },
+      { keys: ["sober san bei chicken","san bei chicken"], display: "Sober San Bei Chicken" },
+    ];
+
+    function normalise(str) {
+      return str.toLowerCase()
+        .replace(/[-–—]/g, ' ')
+        .replace(/&/g, ' and ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Simple Levenshtein distance
+    function levenshtein(a, b) {
+      const m = a.length, n = b.length;
+      const dp = Array.from({length: m+1}, (_, i) => Array.from({length: n+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
+      for (let i = 1; i <= m; i++)
+        for (let j = 1; j <= n; j++)
+          dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+      return dp[m][n];
+    }
+
+    function findMatch(raw) {
+      const norm = normalise(raw);
+      if (norm.length < 3) return null;
+      // First try exact / substring match
+      for (const recipe of RECIPES) {
+        for (const key of recipe.keys) {
+          const nk = normalise(key);
+          if (nk === norm || norm.includes(nk) || nk.includes(norm)) return recipe.display;
+        }
+      }
+      // Fuzzy fallback — allow up to 3 character edits on the closest key
+      let bestMatch = null, bestDist = 4;
+      for (const recipe of RECIPES) {
+        for (const key of recipe.keys) {
+          const nk = normalise(key);
+          const dist = levenshtein(norm, nk);
+          if (dist < bestDist) { bestDist = dist; bestMatch = recipe.display; }
+        }
+      }
+      return bestMatch;
+    }
+
+    const input = document.getElementById('recipeInput');
+    const btn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const landing = document.getElementById('landing');
+    const rewardFlow = document.getElementById('rewardFlow');
+    const stampDishName = document.getElementById('stampDishName');
+
+
+    function attempt() {
+      const match = findMatch(input.value);
+      if (match) {
+        stampDishName.textContent = match;
+
+        landing.classList.add('hidden');
+        rewardFlow.classList.add('active');
+        window.scrollTo({ top: 0 });
+        observeRecipes();
+      } else {
+        input.classList.add('error');
+        errorMsg.classList.add('visible');
+        setTimeout(() => input.classList.remove('error'), 400);
+      }
+    }
+
+    btn.addEventListener('click', attempt);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+    input.addEventListener('input', () => errorMsg.classList.remove('visible'));
+
+    function observeRecipes() {
+      const entries = document.querySelectorAll('.recipe-entry');
+      const observer = new IntersectionObserver((items) => {
+        items.forEach(item => { if (item.isIntersecting) item.target.classList.add('visible'); });
+      }, { threshold: 0.12 });
+      entries.forEach(e => observer.observe(e));
+    }
+  </script>
+</body>
+</html>

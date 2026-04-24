@@ -104,6 +104,28 @@
       justify-content: center;
     }
 
+    /* Gradient at the bottom of the logged-in screen — makes the pill + scroll
+       cue legible against the busy handwritten background (Figma 2171:1131). */
+    .bottom-gradient {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: clamp(180px, 26dvh, 320px);
+      background: linear-gradient(
+        to bottom,
+        rgba(221, 217, 213, 0) 0%,
+        rgba(221, 217, 213, 0.95) 57%,
+        #ddd9d5 57%,
+        #ddd9d5 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.1s;
+    }
+    #landing.opening .bottom-gradient { opacity: 1; }
+
     /* ── CLOSED BOOK STAGE ──
        Clean slide-out: the closed book drifts down and fades as the open
        book emerges past it (like a page being pulled out of a folder). */
@@ -366,30 +388,31 @@
       transform: rotateY(0deg);
     }
 
-    /* Right-page content — alpha bbox of sketchbook-open.png: 17.9%-84.8% × 18.6%-88.4%.
-       Book center (spiral binding) ≈ 51.3%. Right page spans ≈ 51%-85% × 22%-84%. */
+    /* Right-page content — positioned to match Figma's inner text block (2157:4):
+       285px within a 1146px wrap ≈ 24.9% wide. Horizontally centered on the
+       right page (≈ 68% of wrap); vertically just above center. */
     .right-page-content {
       position: absolute;
-      top: 22%;
-      left: 54.5%;
-      width: 28%;
-      height: 48%;
+      top: 36%;
+      left: 55.5%;
+      width: 25%;
       transform: rotate(1.13deg);
       transform-origin: center center;
       container-type: inline-size;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      gap: clamp(0.5rem, 4cqw, 1.5rem);
+      gap: 2.55em;
       text-align: center;
       color: var(--off-black);
+      font-size: clamp(10px, 5.1cqw, 14px);
     }
 
     .right-page-label {
       font-family: 'Special Elite', cursive;
-      font-size: clamp(0.55rem, 4cqw, 0.9rem);
-      letter-spacing: 0.2em;
+      font-size: 1em;
+      letter-spacing: 0.143em;
+      line-height: 1;
       text-transform: uppercase;
       opacity: 0;
       animation: fadeIn 0.5s ease forwards;
@@ -400,10 +423,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(0.15rem, 1cqw, 0.35rem);
+      gap: 0.2em;
       font-family: 'Funkis A', sans-serif;
-      font-size: clamp(0.55rem, 4cqw, 0.9rem);
-      line-height: 1.2;
+      font-size: 1em;
+      line-height: normal;
+      width: 100%;
       opacity: 0;
       animation: fadeIn 0.6s ease forwards;
       animation-delay: 1.2s;
@@ -411,25 +435,32 @@
 
     .inscription-row {
       display: inline-flex;
-      align-items: baseline;
-      gap: clamp(0.2rem, 1.5cqw, 0.5rem);
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.3em;
       white-space: nowrap;
+      width: 100%;
     }
 
-    .chef-nic {
+    /* "Chef Nic" signature slot — an underline with the handwritten scribble
+       sitting on top. Per Figma: line is 144/285 ≈ 50.5% wide, scribble is
+       110.54/285 ≈ 38.8% wide and rotated 2.79deg. The scribble PNG has
+       aspect ~2.85; it overhangs the line slightly top and bottom. */
+    .chef-nic-signature {
       position: relative;
       display: inline-block;
-      font-family: 'Special Elite', cursive;
-      padding: 0 0.4em;
-      border-bottom: 1px solid var(--off-black);
+      width: 8em;
+      height: 1.2em;
+      border-bottom: 1px solid currentColor;
+      flex-shrink: 0;
     }
     .chef-nic-scribble {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 115%;
+      width: 92%;
       height: auto;
-      transform: translate(-50%, -58%) rotate(2.8deg);
+      transform: translate(-50%, -58%) rotate(2.79deg);
       pointer-events: none;
       mix-blend-mode: darken;
     }
@@ -437,15 +468,16 @@
     .inscription-url {
       font-family: 'Funkis A', sans-serif;
       font-weight: 700;
-      font-size: clamp(0.55rem, 4cqw, 0.9rem);
+      font-size: 1em;
     }
 
-    /* Stamp overlay — positioned lower on the right page */
+    /* Stamp overlay — positioned on the right page's lower half.
+       Figma: width 382px in 1146px wrap ≈ 33%; centered on right page (~68% left). */
     .stamp-overlay {
       position: absolute;
-      left: 56.7%;
-      top: 59.5%;
-      width: 20%;
+      left: 51.5%;
+      top: 62%;
+      width: 33%;
       height: auto;
       aspect-ratio: 476 / 273;
       transform-origin: center center;
@@ -703,6 +735,8 @@
   <!-- LANDING -->
   <section id="landing">
 
+    <div class="bottom-gradient" aria-hidden="true"></div>
+
     <!-- CLOSED BOOK (input stage) -->
     <div id="closedStage" class="stage">
       <div class="sketchbook-wrap">
@@ -737,8 +771,7 @@
           <div class="right-page-inscription">
             <div class="inscription-row">
               <span>If found, return to</span>
-              <span class="chef-nic">
-                Chef Nic
+              <span class="chef-nic-signature" role="img" aria-label="Chef Nic">
                 <img class="chef-nic-scribble" src="assets/chef-nic-scribble.png" alt="" />
               </span>
               <span>at</span>

@@ -610,9 +610,9 @@
       min-height: min(95dvh, 1000px);
     }
 
-    /* Card width = closed sketchbook's visible page width (0.566 × its wrap).
-       Height follows from the torn-paper aspect ratio (568 × 825 in Figma),
-       and ends up close to the closed book's visible height. */
+    /* Card width = closed sketchbook's visible page width (0.566 × its wrap),
+       so a fanned recipe paper matches the book's single-page size. Height
+       follows from the torn-paper aspect ratio (568 × 825 in Figma). */
     .recipe-card {
       position: absolute;
       top: 50%;
@@ -631,14 +631,25 @@
         opacity 0.55s ease;
     }
 
-    /* Each card's sketch PNG IS the torn paper + handwriting — no label overlay. */
+    /* Each card's sketch PNG IS the torn paper + handwriting — no label overlay.
+       The inner paper layer handles the hover lift so it doesn't fight the
+       card's state-transition transform above. */
     .recipe-paper {
       position: relative;
       width: 100%;
       height: 100%;
       background: center / contain no-repeat;
       pointer-events: none;
-      filter: drop-shadow(3px 6px 4px rgba(29, 29, 29, 0.15));
+      /* The source PNGs have near-binary alpha (almost no anti-aliasing),
+         so at retina scale their torn edges stair-step and drop-shadow
+         traces the stairs. The 0.5px blur feathers the alpha sub-pixel
+         before the drop-shadow is computed, smoothing both the edge and
+         the shadow silhouette. */
+      filter:
+        blur(0.5px)
+        drop-shadow(3px 10px 22px rgba(29, 29, 29, 0.2));
+      transform: translateY(0);
+      transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
     }
     .recipe-card[data-id="pbj"]       .recipe-paper { background-image: url('assets/sketches/pbj.png'); }
     .recipe-card[data-id="antipasti"] .recipe-paper { background-image: url('assets/sketches/antipasti.png'); }
@@ -646,23 +657,27 @@
     .recipe-card[data-id="lotus"]     .recipe-paper { background-image: url('assets/sketches/lotus.png'); }
     .recipe-card[data-id="sanbei"]    .recipe-paper { background-image: url('assets/sketches/sanbei.png'); }
 
-    /* Per-card fan + stack rotations (z-ordered so PB&J sits on top) */
+    /* Per-card fan + stack rotations (z-ordered so PB&J sits on top).
+       Middle three are scaled slightly so the fan reads as a uniform
+       row of papers against the outer two (PB&J and San Bei). Stack
+       rotations are kept within ~0.5° of PB&J so the pile reads as
+       one card with just a hint of layers beneath. */
     .recipe-card[data-id="pbj"]       { --fan-x: -32%; --fan-rot: -5.77deg; --stack-rot: -1.5deg; z-index: 5; }
-    .recipe-card[data-id="antipasti"] { --fan-x: -14%; --fan-rot: -1.53deg; --stack-rot:  2.0deg; z-index: 4; }
-    .recipe-card[data-id="salmon"]    { --fan-x:   1%; --fan-rot:  2.13deg; --stack-rot: -0.3deg; z-index: 3; }
-    .recipe-card[data-id="lotus"]     { --fan-x:  15%; --fan-rot:  0.23deg; --stack-rot:  1.4deg; z-index: 2; }
-    .recipe-card[data-id="sanbei"]    { --fan-x:  31%; --fan-rot:  7.47deg; --stack-rot:  0.3deg; z-index: 1; }
+    .recipe-card[data-id="antipasti"] { --fan-x: -14%; --fan-rot: -1.53deg; --stack-rot: -1.0deg; --card-scale: 0.94; z-index: 4; }
+    .recipe-card[data-id="salmon"]    { --fan-x:   1%; --fan-rot:  2.13deg; --stack-rot: -1.3deg; --card-scale: 0.94; z-index: 3; }
+    .recipe-card[data-id="lotus"]     { --fan-x:  15%; --fan-rot:  0.23deg; --stack-rot: -1.1deg; --card-scale: 0.94; z-index: 2; }
+    .recipe-card[data-id="sanbei"]    { --fan-x:  31%; --fan-rot:  7.47deg; --stack-rot: -1.4deg; z-index: 1; }
 
     /* State A — stacked (all centered, subtle rotations, faded in) */
     #recipesSection.in-view .recipe-card {
       opacity: 1;
-      transform: translate(-50%, -50%) rotate(var(--stack-rot)) scale(1);
+      transform: translate(-50%, -50%) rotate(var(--stack-rot)) scale(var(--card-scale, 1));
     }
 
     /* State B — exploded: fan out. Stagger by 50ms per card so it ripples. */
     #recipesSection.state-exploded .recipe-card {
       left: calc(50% + var(--fan-x));
-      transform: translate(-50%, -50%) rotate(var(--fan-rot));
+      transform: translate(-50%, -50%) rotate(var(--fan-rot)) scale(var(--card-scale, 1));
     }
     #recipesSection.state-exploded .recipe-card[data-id="pbj"]        { transition-delay: 0s; }
     #recipesSection.state-exploded .recipe-card[data-id="antipasti"]  { transition-delay: 0.05s; }
@@ -670,7 +685,11 @@
     #recipesSection.state-exploded .recipe-card[data-id="lotus"]      { transition-delay: 0.15s; }
     #recipesSection.state-exploded .recipe-card[data-id="sanbei"]     { transition-delay: 0.20s; }
 
-    .recipe-card:hover { filter: brightness(1.03) drop-shadow(2px 4px 6px rgba(29,29,29,0.15)); }
+    /* Hover: paper lifts 12px to signal the card is clickable. Only in the
+       fanned-out state — no lift while stacked or in the detail view. */
+    #recipesSection.state-exploded:not(.state-detail) .recipe-card:hover .recipe-paper {
+      transform: translateY(-12px);
+    }
 
     /* State C — detail: clicked card anchors to left, others fade & shrink. */
     #recipesSection.state-detail .recipe-card:not(.active) {

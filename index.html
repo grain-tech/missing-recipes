@@ -50,9 +50,11 @@
 
     :root {
       --black: #0d0d0d;
+      --off-black: #1a1a1a;
       --white: #eae6e1;
       --yellow: #fecc07;
       --ink: #1a1a1a;
+      --stamp-red: #ff2e2e;
       --faded: #8a8070;
       --grey: #9a9691;
       --grey-light: #e0dcd7;
@@ -62,35 +64,21 @@
 
     body {
       background-color: var(--white);
-      color: var(--black);
+      color: var(--off-black);
       font-family: 'Funkis A', 'DM Sans', sans-serif;
       overflow-x: hidden;
     }
+    body.locked { overflow: hidden; height: 100dvh; }
 
-    /* ─── LANDING ─── */
-    #landing {
-      position: relative;
-      z-index: 1;
-      height: 100vh;
-      height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    #landing.hidden { display: none; }
-
-    /* Background layer — handwritten notes texture */
-    .landing-bg {
-      position: absolute;
+    /* ─── SHARED PAGE BACKGROUND ─── */
+    .page-bg {
+      position: fixed;
       inset: 0;
       z-index: 0;
+      pointer-events: none;
       background: url('bg-texture.jpg') center / cover no-repeat;
     }
-
-    /* Paper texture overlay */
-    .landing-bg::after {
+    .page-bg::after {
       content: '';
       position: absolute;
       inset: 0;
@@ -99,13 +87,38 @@
       opacity: 0.5;
     }
 
-    /* Sketchbook container — aspect ratio matches sketchbook.png (2734x4096) so
-       percentage positions line up with the visible book inside the PNG.
-       Width is capped by viewport width AND height (via aspect ratio) so the
-       book always fits the viewport and stays centered. */
-    .sketchbook-wrap {
+    /* ─── LANDING ─── */
+    #landing {
       position: relative;
       z-index: 1;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── CLOSED BOOK STAGE ── */
+    #closedStage {
+      transition: opacity 0.7s cubic-bezier(0.55, 0, 0.6, 0.2),
+                  transform 0.7s cubic-bezier(0.55, 0, 0.6, 0.2);
+      transform-origin: 35% 50%;
+    }
+    #landing.opening #closedStage {
+      opacity: 0;
+      transform: scale(0.35) rotate(-8deg);
+      pointer-events: none;
+    }
+
+    /* aspect ratio matches sketchbook.png (2734x4096) */
+    .sketchbook-wrap {
+      position: relative;
       width: min(1000px, 96vw, calc(100dvh * 2734 / 4096));
       aspect-ratio: 2734 / 4096;
       animation: slideUp 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
@@ -125,10 +138,7 @@
       filter: drop-shadow(10px 10px 2px rgba(29,29,29,0.8));
     }
 
-    /* Content on the sketchbook — centered on the visible page (alpha bbox
-       of sketchbook.png: 27% top / 28% left / 54% × 54%, so center is 55%, 54%).
-       container-type enables cqw units below, which match the Figma spec
-       (450px page → 60px heading = 13.33cqw etc.) regardless of book size. */
+    /* Closed-book content overlay — centered on the visible page */
     .sketchbook-content {
       position: absolute;
       top: 54%;
@@ -163,7 +173,6 @@
       gap: clamp(0.5rem, 5.33cqw, 1.75rem);
     }
 
-    /* Stamp label on book */
     .stamp-label-book {
       font-family: 'Special Elite', cursive;
       font-size: clamp(0.65rem, 4cqw, 1.15rem);
@@ -199,7 +208,6 @@
       animation-delay: 1.8s;
     }
 
-    /* Input area on book */
     .book-form {
       display: flex;
       flex-direction: column;
@@ -273,7 +281,7 @@
       padding: 2.67cqw 5.33cqw;
       font-family: 'Funkis A', 'DM Sans', sans-serif;
       font-size: clamp(0.75rem, 4cqw, 1.25rem);
-      font-weight: 700;
+      font-weight: 600;
       text-transform: none;
       cursor: pointer;
       border-radius: clamp(2px, 0.56cqw, 3px);
@@ -296,182 +304,302 @@
       to   { opacity: 1; }
     }
 
-    /* ─── REWARD FLOW ─── */
-    #rewardFlow { display: none; position: relative; z-index: 1; }
-    #rewardFlow.active { display: block; }
+    /* ── OPEN BOOK STAGE ── */
+    #openStage {
+      flex-direction: column;
+      gap: clamp(1rem, 3vh, 2.5rem);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease 0.35s;
+    }
+    #landing.opening #openStage {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
-    /* Noise overlay for reward flow */
-    #rewardFlow::before {
+    /* Open sketchbook container — aspect matches sketchbook-open.png (1024x733) */
+    .book-open-wrap {
+      position: relative;
+      width: min(1100px, 94vw, calc(78dvh * 1024 / 733));
+      aspect-ratio: 1024 / 733;
+      transform: scaleX(0.35);
+      transform-origin: center center;
+      transition: transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s;
+    }
+    #landing.opening .book-open-wrap {
+      transform: scaleX(1);
+    }
+
+    .book-open-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(10px 10px 6px rgba(29,29,29,0.35));
+    }
+
+    /* Right-page content — alpha bbox of sketchbook-open.png: 17.9%-84.8% × 18.6%-88.4%.
+       Book center (spiral binding) ≈ 51.3%. Right page spans ≈ 51%-85% × 22%-84%. */
+    .right-page-content {
+      position: absolute;
+      top: 22%;
+      left: 54.5%;
+      width: 28%;
+      height: 48%;
+      transform: rotate(1.13deg);
+      transform-origin: center center;
+      container-type: inline-size;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: clamp(0.5rem, 4cqw, 1.5rem);
+      text-align: center;
+      color: var(--off-black);
+    }
+
+    .right-page-label {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(0.55rem, 4cqw, 0.9rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: 1.0s;
+    }
+
+    .right-page-inscription {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(0.15rem, 1cqw, 0.35rem);
+      font-family: 'Funkis A', sans-serif;
+      font-size: clamp(0.55rem, 4cqw, 0.9rem);
+      line-height: 1.2;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+      animation-delay: 1.2s;
+    }
+
+    .inscription-row {
+      display: inline-flex;
+      align-items: baseline;
+      gap: clamp(0.2rem, 1.5cqw, 0.5rem);
+      white-space: nowrap;
+    }
+
+    .chef-nic {
+      position: relative;
+      display: inline-block;
+      font-family: 'Special Elite', cursive;
+      padding: 0 0.4em;
+      border-bottom: 1px solid var(--off-black);
+    }
+    .chef-nic-scribble {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 115%;
+      height: auto;
+      transform: translate(-50%, -58%) rotate(2.8deg);
+      pointer-events: none;
+      mix-blend-mode: darken;
+    }
+
+    .inscription-url {
+      font-family: 'Funkis A', sans-serif;
+      font-weight: 700;
+      font-size: clamp(0.55rem, 4cqw, 0.9rem);
+    }
+
+    /* Stamp overlay — positioned lower on the right page */
+    .stamp-overlay {
+      position: absolute;
+      left: 56.7%;
+      top: 59.5%;
+      width: 20%;
+      height: auto;
+      aspect-ratio: 476 / 273;
+      transform-origin: center center;
+      transform: rotate(-6deg) scale(1.8);
+      opacity: 0;
+      transition:
+        opacity 0.08s linear 1.5s,
+        transform 0.5s cubic-bezier(0.12, 0.9, 0.28, 1.4) 1.5s;
+      pointer-events: none;
+    }
+    #landing.stamped .stamp-overlay {
+      opacity: 1;
+      transform: rotate(1.13deg) scale(1);
+      animation: stampJitter 0.3s ease 2.0s 1;
+    }
+
+    @keyframes stampJitter {
+      0%, 100% { transform: rotate(1.13deg) scale(1); }
+      35% { transform: rotate(1.5deg) scale(1.03); }
+      70% { transform: rotate(0.8deg) scale(0.99); }
+    }
+
+    /* Post-book CTA: "Chef Nic is relieved" pill + scroll cue */
+    .post-book-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease 2.3s, transform 0.5s ease 2.3s;
+    }
+    #landing.stamped .post-book-cta { opacity: 1; transform: translateY(0); }
+
+    .relieved-pill {
+      background: var(--white);
+      padding: 6px 24px;
+      border-radius: 10px;
+      font-size: clamp(0.8rem, 1.4vw, 1rem);
+      color: var(--off-black);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .scroll-cue-bob {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(0.8rem, 1.4vw, 1rem);
+      color: var(--off-black);
+      animation: jump 2.4s cubic-bezier(0.45, 0, 0.55, 1) 2.8s infinite;
+    }
+
+    .mouse-icon {
+      position: relative;
+      width: 14px;
+      height: 20px;
+      border: 1px solid var(--off-black);
+      border-radius: 100px;
+      flex-shrink: 0;
+    }
+    .mouse-icon::after {
       content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 100;
+      position: absolute;
+      top: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 5px;
+      background: var(--off-black);
+      border-radius: 100px;
     }
 
-    .notebook-lines {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background-image: repeating-linear-gradient(
-        transparent, transparent 31px,
-        rgba(0,0,0,0.05) 31px, rgba(0,0,0,0.05) 32px
-      );
-      display: none;
+    @keyframes jump {
+      0%, 40%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+      60% { transform: translateY(0); }
+      70% { transform: translateY(-7px); }
+      80% { transform: translateY(0); }
     }
-    #rewardFlow.active ~ .notebook-lines { display: block; }
 
-    /* ─── STAMP SECTION ─── */
-    #stampSection {
-      min-height: 100vh;
+    /* ─── MISSING RECIPES HEADING ─── */
+    #recipesScroll {
+      position: relative;
+      z-index: 1;
+      padding: clamp(3rem, 8vh, 6rem) 1.5rem clamp(3rem, 6vh, 5rem);
+    }
+
+    .recipes-heading {
+      font-family: 'Kapra Neue', 'Archivo Black', 'Arial Black', sans-serif;
+      font-size: clamp(1.6rem, 5vw, 3.75rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--off-black);
+      line-height: 1.05;
+      max-width: 1000px;
+      margin: 0 auto clamp(2rem, 5vh, 4rem);
+    }
+
+    .recipes-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(2rem, 6vh, 4rem);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .recipe-card {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 568 / 720;
+      background: url('assets/torn-paper.png') center / contain no-repeat;
+      padding: 16% 14%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1.5rem;
-      padding: 3rem 2rem;
       text-align: center;
-    }
-
-    .stamp-label {
-      font-family: 'Special Elite', cursive;
-      font-size: 0.7rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--faded);
-      border: 1px solid var(--faded);
-      padding: 0.3rem 0.8rem;
-      transform: rotate(-1deg);
-    }
-
-    .stamp-recovered {
-      font-family: 'Special Elite', cursive;
-      font-size: clamp(2rem, 7vw, 3.5rem);
-      color: var(--black);
-      border: 3px solid var(--black);
-      padding: 0.5rem 1.5rem;
-      transform: rotate(-2deg);
-      letter-spacing: 0.1em;
-      position: relative;
-      animation: stampIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
-      animation-delay: 0.15s;
-    }
-    .stamp-recovered::after {
-      content: '';
-      position: absolute;
-      inset: 3px;
-      border: 1px solid var(--black);
-    }
-
-    @keyframes stampIn {
-      from { opacity: 0; transform: rotate(-2deg) scale(1.5); }
-      to   { opacity: 1; transform: rotate(-2deg) scale(1); }
-    }
-
-    .stamp-msg {
-      font-family: 'Special Elite', cursive;
-      font-size: clamp(1rem, 3vw, 1.4rem);
-      color: var(--ink);
-      max-width: 400px;
-      line-height: 1.5;
-      animation: fadeUp 0.5s ease both;
-      animation-delay: 0.5s;
+      gap: 0.75rem;
       opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
     }
-
-    .stamp-sub {
-      font-size: 0.9rem;
-      color: var(--faded);
-      font-style: italic;
-      animation: fadeUp 0.5s ease both;
-      animation-delay: 0.7s;
-      opacity: 0;
-    }
-
-    .scroll-cue {
-      margin-top: 1rem;
-      font-size: 0.75rem;
-      color: var(--faded);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      animation: fadeUp 0.5s ease both, bob 1.8s ease-in-out infinite;
-      animation-delay: 1s, 1.5s;
-      opacity: 0;
-    }
-
-    @keyframes bob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(5px); }
-    }
-
-    /* ─── RECIPES SECTION ─── */
-    #recipesSection {
-      padding: 4rem 2rem 5rem;
-      max-width: 600px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 5rem;
-    }
-
-    .section-label {
-      font-family: 'Special Elite', cursive;
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--faded);
-      text-align: center;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
-
-    .recipe-entry {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity 0.65s ease, transform 0.65s ease;
-    }
-    .recipe-entry.visible { opacity: 1; transform: translateY(0); }
+    .recipe-card:nth-child(even) { transform: translateY(32px) rotate(-1.5deg); }
+    .recipe-card:nth-child(odd)  { transform: translateY(32px) rotate(1.2deg); }
+    .recipe-card.visible { opacity: 1; }
+    .recipe-card:nth-child(even).visible { transform: translateY(0) rotate(-1.5deg); }
+    .recipe-card:nth-child(odd).visible  { transform: translateY(0) rotate(1.2deg); }
 
     .recipe-number {
       font-family: 'Special Elite', cursive;
-      font-size: 0.72rem;
+      font-size: clamp(0.75rem, 1.6vw, 0.95rem);
       color: var(--faded);
-      letter-spacing: 0.18em;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
     }
 
-    .recipe-img {
-      width: 100%;
-      aspect-ratio: 3/4;
-      object-fit: cover;
-      filter: grayscale(10%);
-      border: 1px solid rgba(0,0,0,0.1);
+    .recipe-name {
+      font-family: 'Kapra Neue', 'Archivo Black', 'Arial Black', sans-serif;
+      font-size: clamp(1.3rem, 3.8vw, 2.25rem);
+      text-transform: uppercase;
+      line-height: 1.05;
+      max-width: 12ch;
+    }
+
+    .recipe-note {
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+      color: var(--faded);
+      margin-top: 0.5rem;
     }
 
     /* ─── REWARD SECTION ─── */
     #rewardSection {
+      position: relative;
+      z-index: 1;
       min-height: 80vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1.5rem;
-      padding: 4rem 2rem;
+      gap: 1.25rem;
+      padding: clamp(3rem, 8vh, 5rem) 2rem;
       text-align: center;
-      border-top: 1px solid rgba(0,0,0,0.1);
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .reward-label {
+      font-family: 'Special Elite', cursive;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--faded);
     }
 
     .reward-msg {
-      font-size: 0.9rem;
-      color: var(--faded);
-      font-style: italic;
-      line-height: 1.9;
-      max-width: 360px;
+      font-size: 0.95rem;
+      color: var(--off-black);
+      line-height: 1.7;
+      max-width: 380px;
     }
 
     .reward-code {
@@ -500,10 +628,9 @@
       border: none;
       padding: 0.85rem 2.5rem;
       font-family: 'Funkis A', 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
@@ -512,6 +639,8 @@
     .cta-btn:hover { background: var(--ink); transform: translateY(-1px); }
 
     .grain-footer {
+      position: relative;
+      z-index: 1;
       padding: 2rem;
       text-align: center;
       font-family: 'Special Elite', cursive;
@@ -522,13 +651,15 @@
       border-top: 1px solid rgba(0,0,0,0.08);
     }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* Keep scroll content hidden until the flow is unlocked */
+    body.locked #recipesScroll,
+    body.locked #rewardSection,
+    body.locked .grain-footer {
+      visibility: hidden;
     }
   </style>
 </head>
-<body>
+<body class="locked">
 
   <!-- SVG filter — subtle displacement for hand-drawn borders/strokes -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -540,84 +671,117 @@
     </defs>
   </svg>
 
+  <div class="page-bg"></div>
+
   <!-- LANDING -->
   <section id="landing">
-    <div class="landing-bg"></div>
-    <div class="sketchbook-wrap">
-      <img class="sketchbook-img" src="sketchbook.png" alt="" />
-      <div class="sketchbook-content">
-        <div class="stamp-label-book">Grain Test Kitchen</div>
-        <div class="book-body">
-          <div class="book-top">
-            <h1 class="heading-book">You found a<br>missing recipe.</h1>
-            <p class="subtext-book">Chef Nic's been looking everywhere.<br>Which one did you find?</p>
-          </div>
-          <div class="book-form">
-            <div class="input-wrap">
-              <input class="input-field-book" id="recipeInput" type="text" placeholder="Type the dish name here…" autocomplete="off" spellcheck="false" />
+
+    <!-- CLOSED BOOK (input stage) -->
+    <div id="closedStage" class="stage">
+      <div class="sketchbook-wrap">
+        <img class="sketchbook-img" src="sketchbook.png" alt="" />
+        <div class="sketchbook-content">
+          <div class="stamp-label-book">Grain Test Kitchen</div>
+          <div class="book-body">
+            <div class="book-top">
+              <h1 class="heading-book">You found a<br>missing recipe.</h1>
+              <p class="subtext-book">Chef Nic's been looking everywhere.<br>Which one did you find?</p>
             </div>
-            <div class="error-msg" id="errorMsg">That doesn't match any of our missing recipes.</div>
-            <button class="submit-btn-book" id="submitBtn">Return the recipe</button>
+            <div class="book-form">
+              <div class="input-wrap">
+                <input class="input-field-book" id="recipeInput" type="text" placeholder="Type the dish name here…" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="error-msg" id="errorMsg">That doesn't match any of our missing recipes.</div>
+              <button class="submit-btn-book" id="submitBtn">Return the recipe</button>
+            </div>
+          </div>
+          <p class="footer-note-book">grain.com.sg/missingrecipes</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPEN BOOK (reward stage) -->
+    <div id="openStage" class="stage">
+      <div class="book-open-wrap">
+        <img class="book-open-img" src="assets/sketchbook-open.png" alt="" />
+        <div class="right-page-content">
+          <div class="right-page-label">Grain test kitchen</div>
+          <div class="right-page-inscription">
+            <div class="inscription-row">
+              <span>If found, return to</span>
+              <span class="chef-nic">
+                Chef Nic
+                <img class="chef-nic-scribble" src="assets/chef-nic-scribble.png" alt="" />
+              </span>
+              <span>at</span>
+            </div>
+            <div class="inscription-url">grain.com.sg/missingrecipes</div>
           </div>
         </div>
-        <p class="footer-note-book">grain.com.sg/missing-recipes</p>
+        <img class="stamp-overlay" src="assets/stamp.svg" alt="Recipe returned" />
+      </div>
+
+      <div class="post-book-cta">
+        <div class="relieved-pill">Chef Nic is relieved.</div>
+        <div class="scroll-cue-bob">
+          <span class="mouse-icon" aria-hidden="true"></span>
+          <span>Scroll to see what you've unlocked.</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- RECIPES SCROLL SECTION -->
+  <section id="recipesScroll">
+    <h2 class="recipes-heading">The missing recipes — now returned</h2>
+
+    <div class="recipes-stack">
+      <div class="recipe-card">
+        <div class="recipe-number">Recipe 01 — returned</div>
+        <div class="recipe-name">The PB&amp;J</div>
+        <div class="recipe-note">Back on the menu. For real this time.</div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-number">Recipe 02 — returned</div>
+        <div class="recipe-name">Loaded Antipasti Focaccia</div>
+        <div class="recipe-note">Chef Nic almost cried. (Almost.)</div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-number">Recipe 03 — returned</div>
+        <div class="recipe-name">Confit Salmon Cubes &amp; Pumpkin</div>
+        <div class="recipe-note">The one that got away, now found.</div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-number">Recipe 04 — returned</div>
+        <div class="recipe-name">Wok-Fried Lotus Root &amp; Black Fungus</div>
+        <div class="recipe-note">Crunch restored.</div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-number">Recipe 05 — returned</div>
+        <div class="recipe-name">Sober San Bei Chicken</div>
+        <div class="recipe-note">Three cups. Zero regrets.</div>
       </div>
     </div>
   </section>
 
-  <!-- REWARD FLOW -->
-  <div id="rewardFlow">
-    <section id="stampSection">
-      <div class="stamp-label">Grain Test Kitchen</div>
-      <div class="stamp-recovered">Recipe Returned.</div>
-      <p class="stamp-msg" id="stampDishName"></p>
-      <p class="stamp-sub">Chef Nic is relieved.</p>
-      <p class="scroll-cue">&#8595; &nbsp; scroll to see what you've unlocked</p>
-    </section>
+  <!-- REWARD SECTION -->
+  <section id="rewardSection">
+    <div class="reward-label">Your reward</div>
+    <p class="reward-msg">
+      Thanks to you, this dish is making it to June's menu launch.<br>
+      You've earned yourself a little something.
+    </p>
+    <div class="reward-code">FOUNDIT10</div>
+    <p class="reward-terms">
+      <strong>10% off catering, capped at $100.</strong><br>
+      Valid for events in June and July.<br>
+      Enter code at checkout. Not valid with ongoing promotions.
+    </p>
+    <a href="https://grain.com.sg/whats-cooking-june-26" class="cta-btn">Book your buffet</a>
+  </section>
 
-    <section id="recipesSection">
-      <div class="section-label">The missing recipes — now returned</div>
-      <div class="recipe-entry">
-        <div class="recipe-number">01 — The PB&amp;J</div>
-        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="The PB&J recipe page" />
-      </div>
-      <div class="recipe-entry">
-        <div class="recipe-number">02 — Loaded Antipasti Focaccia</div>
-        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Loaded Antipasti Focaccia recipe page" />
-      </div>
-      <div class="recipe-entry">
-        <div class="recipe-number">03 — Confit Salmon Cubes and Pumpkin</div>
-        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Confit Salmon Cubes and Pumpkin recipe page" />
-      </div>
-      <div class="recipe-entry">
-        <div class="recipe-number">04 — Wok-Fried Lotus Root and Black Fungus</div>
-        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Wok-Fried Lotus Root and Black Fungus recipe page" />
-      </div>
-      <div class="recipe-entry">
-        <div class="recipe-number">05 — Sober San Bei Chicken</div>
-        <img class="recipe-img" src="recipe-placeholder.jpeg" alt="Sober San Bei Chicken recipe page" />
-      </div>
-    </section>
-
-    <section id="rewardSection">
-      <div class="stamp-label">Your reward</div>
-      <p class="reward-msg">
-        Thanks to you, this dish is making it to June's menu launch.<br>
-        You've earned yourself a little something.
-      </p>
-      <div class="reward-code">FOUNDIT10</div>
-      <p class="reward-terms">
-        <strong>10% off catering, capped at $100.</strong><br>
-        Valid for events in June and July.<br>
-        Enter code at checkout. Not valid with ongoing promotions.
-      </p>
-      <a href="https://grain.com.sg/whats-cooking-june-26" class="cta-btn">Book your buffet</a>
-    </section>
-
-    <footer class="grain-footer">Grain<br>grain.com.sg/missing-recipes</footer>
-  </div>
-
-  <div class="notebook-lines"></div>
+  <footer class="grain-footer">Grain<br>grain.com.sg/missingrecipes</footer>
 
   <script>
     const RECIPES = [
@@ -630,7 +794,7 @@
 
     function normalise(str) {
       return str.toLowerCase()
-        .replace(/[-\u2013\u2014]/g, ' ')
+        .replace(/[-–—]/g, ' ')
         .replace(/&/g, ' and ')
         .replace(/\s+/g, ' ')
         .trim();
@@ -669,17 +833,16 @@
     const btn = document.getElementById('submitBtn');
     const errorMsg = document.getElementById('errorMsg');
     const landing = document.getElementById('landing');
-    const rewardFlow = document.getElementById('rewardFlow');
-    const stampDishName = document.getElementById('stampDishName');
 
     function attempt() {
       const match = findMatch(input.value);
       if (match) {
-        stampDishName.textContent = match;
-        landing.classList.add('hidden');
-        rewardFlow.classList.add('active');
-        window.scrollTo({ top: 0 });
-        observeRecipes();
+        landing.classList.add('opening');
+        setTimeout(() => landing.classList.add('stamped'), 1500);
+        setTimeout(() => {
+          document.body.classList.remove('locked');
+          observeRecipes();
+        }, 3000);
       } else {
         input.classList.add('error');
         errorMsg.classList.add('visible');
@@ -691,11 +854,28 @@
     input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
     input.addEventListener('input', () => errorMsg.classList.remove('visible'));
 
+    // Debug shortcut: #open jumps straight to the reward state for preview.
+    if (location.hash === '#open') {
+      input.value = 'the pb&j';
+      requestAnimationFrame(attempt);
+    }
+    if (location.hash === '#scroll' || location.hash === '#recipes-only') {
+      landing.classList.add('opening', 'stamped');
+      document.body.classList.remove('locked');
+      document.querySelectorAll('.recipe-card').forEach(e => e.classList.add('visible'));
+      if (location.hash === '#recipes-only') {
+        document.getElementById('landing').style.display = 'none';
+      }
+      requestAnimationFrame(() => {
+        document.getElementById('recipesScroll').scrollIntoView();
+      });
+    }
+
     function observeRecipes() {
-      const entries = document.querySelectorAll('.recipe-entry');
+      const entries = document.querySelectorAll('.recipe-card');
       const observer = new IntersectionObserver((items) => {
         items.forEach(item => { if (item.isIntersecting) item.target.classList.add('visible'); });
-      }, { threshold: 0.12 });
+      }, { threshold: 0.15 });
       entries.forEach(e => observer.observe(e));
     }
   </script>

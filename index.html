@@ -104,8 +104,9 @@
       justify-content: center;
     }
 
-    /* Gradient at the bottom of the logged-in screen — makes the pill + scroll
-       cue legible against the busy handwritten background (Figma 2171:1131). */
+    /* Gradient at the bottom of the logged-in screen — fades the busy
+       handwritten landing background into the dinnerplate-white of the
+       sections below, so #recipesSection appears seamlessly. */
     .bottom-gradient {
       position: absolute;
       left: 0;
@@ -114,10 +115,10 @@
       height: clamp(180px, 26dvh, 320px);
       background: linear-gradient(
         to bottom,
-        rgba(221, 217, 213, 0) 0%,
-        rgba(221, 217, 213, 0.95) 57%,
-        #ddd9d5 57%,
-        #ddd9d5 100%
+        rgba(234, 230, 225, 0) 0%,
+        rgba(234, 230, 225, 0.95) 57%,
+        #eae6e1 57%,
+        #eae6e1 100%
       );
       pointer-events: none;
       z-index: 0;
@@ -141,10 +142,13 @@
       pointer-events: none;
     }
 
-    /* aspect ratio matches sketchbook.png (2734x4096) */
+    /* aspect ratio matches sketchbook.png (2734x4096).
+       The visible book only occupies 56.5% × 53.9% of the PNG (transparent padding),
+       so we oversize the wrap to make the actual book dominate the viewport — the
+       padding spills past #landing's overflow:hidden and is clipped cleanly. */
     .sketchbook-wrap {
       position: relative;
-      width: min(1000px, 96vw, calc(100dvh * 2734 / 4096));
+      width: min(1200px, 96vw, 105dvh);
       aspect-ratio: 2734 / 4096;
       animation: slideUp 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
     }
@@ -349,23 +353,31 @@
       pointer-events: auto;
     }
 
-    /* Open sketchbook container — aspect matches sketchbook-open.png (1024x733).
-       Two halves hinge at the spine to spread from folded to flat. */
+    /* Open sketchbook — the wrap is the *visible* book (alpha bbox of
+       sketchbook-open.png: 685×512), so its dimensions match the closed
+       book cover on the landing page. The PNG is oversized on each half so
+       its transparent padding spills past the wrap and clips cleanly.
+       Width picks the smaller of: hard cap, 96vw, or 114dvh — calibrated
+       so visible book height ≈ closed book's visible height (~85dvh). */
     .book-open-wrap {
       position: relative;
-      width: min(1100px, 94vw, calc(78dvh * 1024 / 733));
-      aspect-ratio: 1024 / 733;
+      width: min(1296px, 96vw, 114dvh);
+      aspect-ratio: 685 / 512;
       perspective: 2200px;
       transform-style: preserve-3d;
     }
 
+    /* Background sized to 299% × 143.16% of each half so the PNG's alpha
+       bbox (66.9% × 69.8% of the PNG) maps to exactly one wrap dimension.
+       bg-position derived so PNG x=17.9%/51.35% (left/right page edge at
+       spine) sits at each half's left edge, and PNG y=18.6% sits at top. */
     .book-half {
       position: absolute;
       top: 0;
       width: 50%;
       height: 100%;
       background-image: url('assets/sketchbook-open.png');
-      background-size: 200% 100%;
+      background-size: 299% 143.16%;
       background-repeat: no-repeat;
       backface-visibility: hidden;
       filter: drop-shadow(6px 8px 6px rgba(29,29,29,0.25));
@@ -373,13 +385,13 @@
     }
     .book-half--left {
       left: 0;
-      background-position: 0% 0%;
+      background-position: 26.9% 61.7%;
       transform-origin: right center;
       transform: rotateY(-88deg);
     }
     .book-half--right {
       left: 50%;
-      background-position: 100% 0%;
+      background-position: 77.1% 61.7%;
       transform-origin: left center;
       transform: rotateY(88deg);
     }
@@ -388,15 +400,14 @@
       transform: rotateY(0deg);
     }
 
-    /* Right-page content — positioned to match Figma's inner text block (2157:4):
-       285px within a 1146px wrap ≈ 24.9% wide. Horizontally centered on the
-       right page (≈ 68% of wrap); vertically just above center. */
+    /* Right-page content — wrap = visible book, so Figma percentages apply
+       directly. Text block centered at (74.3%, 50%) of wrap, width 24.87%. */
     .right-page-content {
       position: absolute;
-      top: 36%;
-      left: 55.5%;
-      width: 25%;
-      transform: rotate(1.13deg);
+      top: 50%;
+      left: 74.3%;
+      width: 24.87%;
+      transform: translate(-50%, -50%);
       transform-origin: center center;
       container-type: inline-size;
       display: flex;
@@ -442,14 +453,13 @@
       width: 100%;
     }
 
-    /* "Chef Nic" signature slot — an underline with the handwritten scribble
-       sitting on top. Per Figma: line is 144/285 ≈ 50.5% wide, scribble is
-       110.54/285 ≈ 38.8% wide and rotated 2.79deg. The scribble PNG has
-       aspect ~2.85; it overhangs the line slightly top and bottom. */
+    /* "Chef Nic" signature slot — Figma: line is 144px in a 285px text block
+       (~10.3em at the 14px base), scribble is 108.956px = 75.7% of the line
+       width, rotated 2.79deg. */
     .chef-nic-signature {
       position: relative;
       display: inline-block;
-      width: 8em;
+      width: 10.3em;
       height: 1.2em;
       border-bottom: 1px solid currentColor;
       flex-shrink: 0;
@@ -458,7 +468,7 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 92%;
+      width: 75.7%;
       height: auto;
       transform: translate(-50%, -58%) rotate(2.79deg);
       pointer-events: none;
@@ -471,17 +481,17 @@
       font-size: 1em;
     }
 
-    /* Stamp overlay — positioned on the right page's lower half.
-       Figma: width 382px in 1146px wrap ≈ 33%; centered on right page (~68% left). */
+    /* Stamp overlay — smaller (25% wrap wide), sitting straight on the
+       right page. Aspect 476/273 matches stamp.svg viewBox. */
     .stamp-overlay {
       position: absolute;
-      left: 51.5%;
-      top: 62%;
-      width: 33%;
+      left: 65.3%;
+      top: 67%;
+      width: 25%;
       height: auto;
       aspect-ratio: 476 / 273;
       transform-origin: center center;
-      transform: rotate(-6deg) scale(1.8);
+      transform: scale(1.8);
       opacity: 0;
       transition:
         opacity 0.08s linear 1.6s,
@@ -490,22 +500,24 @@
     }
     #landing.stamped .stamp-overlay {
       opacity: 1;
-      transform: rotate(1.13deg) scale(1);
+      transform: scale(1);
       animation: stampJitter 0.3s ease 2.1s 1;
     }
 
     @keyframes stampJitter {
-      0%, 100% { transform: rotate(1.13deg) scale(1); }
-      35% { transform: rotate(1.5deg) scale(1.03); }
-      70% { transform: rotate(0.8deg) scale(0.99); }
+      0%, 100% { transform: scale(1); }
+      35% { transform: scale(1.03); }
+      70% { transform: scale(0.99); }
     }
 
-    /* Post-book CTA: "Chef Nic is relieved" pill + scroll cue */
+    /* Post-book CTA: "Chef Nic is relieved" pill + scroll cue. Gap is 18px
+       so the scroll cue's peak jump (translateY(-14px)) stays ~4px clear
+       of the pill above. */
     .post-book-cta {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
+      gap: 1.125rem;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.5s ease 2.4s, transform 0.5s ease 2.4s;
@@ -558,78 +570,249 @@
       80% { transform: translateY(0); }
     }
 
-    /* ─── MISSING RECIPES HEADING ─── */
-    #recipesScroll {
+    /* ─── RECIPES SECTION (stack → exploded → detail) ─── */
+    /* Opaque bg seals off the landing's handwritten .page-bg texture so it
+       stops bleeding through below the bottom-gradient (Figma 2160:135). */
+    #recipesSection {
       position: relative;
       z-index: 1;
-      padding: clamp(3rem, 8vh, 6rem) 1.5rem clamp(3rem, 6vh, 5rem);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(2rem, 5vh, 4rem) 1.25rem clamp(2rem, 5vh, 4rem);
+      background-color: var(--white);
     }
 
     .recipes-heading {
-      font-family: 'Kapra Neue', 'Archivo Black', 'Arial Black', sans-serif;
-      font-size: clamp(1.6rem, 5vw, 3.75rem);
+      font-family: 'Kapra Neue', 'Archivo Black', sans-serif;
       font-weight: 900;
+      font-size: clamp(1.3rem, 3.125vw, 3.75rem);
+      line-height: normal;
       text-transform: uppercase;
       text-align: center;
       color: var(--off-black);
-      line-height: 1.05;
-      max-width: 1000px;
-      margin: 0 auto clamp(2rem, 5vh, 4rem);
-    }
-
-    .recipes-stack {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: clamp(2rem, 6vh, 4rem);
-      max-width: 520px;
+      max-width: 1100px;
       margin: 0 auto;
-    }
-
-    .recipe-card {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 568 / 720;
-      background: url('assets/torn-paper.png') center / contain no-repeat;
-      padding: 16% 14%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 0.75rem;
       opacity: 0;
-      transform: translateY(32px);
+      transform: translateY(18px);
       transition: opacity 0.7s ease, transform 0.7s ease;
     }
-    .recipe-card:nth-child(even) { transform: translateY(32px) rotate(-1.5deg); }
-    .recipe-card:nth-child(odd)  { transform: translateY(32px) rotate(1.2deg); }
-    .recipe-card.visible { opacity: 1; }
-    .recipe-card:nth-child(even).visible { transform: translateY(0) rotate(-1.5deg); }
-    .recipe-card:nth-child(odd).visible  { transform: translateY(0) rotate(1.2deg); }
+    #recipesSection.in-view .recipes-heading { opacity: 1; transform: translateY(0); }
 
-    .recipe-number {
+    .recipes-stage {
+      position: relative;
+      width: 100%;
+      max-width: 1920px;
+      margin: clamp(1rem, 3vh, 2rem) auto 0;
+      flex: 1;
+      min-height: min(95dvh, 1000px);
+    }
+
+    /* Card width = closed sketchbook's visible page width (0.566 × its wrap).
+       Height follows from the torn-paper aspect ratio (568 × 825 in Figma),
+       and ends up close to the closed book's visible height. */
+    .recipe-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: min(680px, 54vw, 59dvh);
+      aspect-ratio: 568 / 825;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      opacity: 0;
+      transform: translate(-50%, calc(-50% + 40px)) rotate(var(--stack-rot, 0deg)) scale(0.88);
+      transition:
+        left 0.95s cubic-bezier(0.22, 0.61, 0.36, 1),
+        transform 0.95s cubic-bezier(0.22, 0.61, 0.36, 1),
+        opacity 0.55s ease;
+    }
+
+    /* Each card's sketch PNG IS the torn paper + handwriting — no label overlay. */
+    .recipe-paper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: center / contain no-repeat;
+      pointer-events: none;
+      filter: drop-shadow(3px 6px 4px rgba(29, 29, 29, 0.15));
+    }
+    .recipe-card[data-id="pbj"]       .recipe-paper { background-image: url('assets/sketches/pbj.png'); }
+    .recipe-card[data-id="antipasti"] .recipe-paper { background-image: url('assets/sketches/antipasti.png'); }
+    .recipe-card[data-id="salmon"]    .recipe-paper { background-image: url('assets/sketches/salmon.png'); }
+    .recipe-card[data-id="lotus"]     .recipe-paper { background-image: url('assets/sketches/lotus.png'); }
+    .recipe-card[data-id="sanbei"]    .recipe-paper { background-image: url('assets/sketches/sanbei.png'); }
+
+    /* Per-card fan + stack rotations (z-ordered so PB&J sits on top) */
+    .recipe-card[data-id="pbj"]       { --fan-x: -32%; --fan-rot: -5.77deg; --stack-rot: -1.5deg; z-index: 5; }
+    .recipe-card[data-id="antipasti"] { --fan-x: -14%; --fan-rot: -1.53deg; --stack-rot:  2.0deg; z-index: 4; }
+    .recipe-card[data-id="salmon"]    { --fan-x:   1%; --fan-rot:  2.13deg; --stack-rot: -0.3deg; z-index: 3; }
+    .recipe-card[data-id="lotus"]     { --fan-x:  15%; --fan-rot:  0.23deg; --stack-rot:  1.4deg; z-index: 2; }
+    .recipe-card[data-id="sanbei"]    { --fan-x:  31%; --fan-rot:  7.47deg; --stack-rot:  0.3deg; z-index: 1; }
+
+    /* State A — stacked (all centered, subtle rotations, faded in) */
+    #recipesSection.in-view .recipe-card {
+      opacity: 1;
+      transform: translate(-50%, -50%) rotate(var(--stack-rot)) scale(1);
+    }
+
+    /* State B — exploded: fan out. Stagger by 50ms per card so it ripples. */
+    #recipesSection.state-exploded .recipe-card {
+      left: calc(50% + var(--fan-x));
+      transform: translate(-50%, -50%) rotate(var(--fan-rot));
+    }
+    #recipesSection.state-exploded .recipe-card[data-id="pbj"]        { transition-delay: 0s; }
+    #recipesSection.state-exploded .recipe-card[data-id="antipasti"]  { transition-delay: 0.05s; }
+    #recipesSection.state-exploded .recipe-card[data-id="salmon"]     { transition-delay: 0.10s; }
+    #recipesSection.state-exploded .recipe-card[data-id="lotus"]      { transition-delay: 0.15s; }
+    #recipesSection.state-exploded .recipe-card[data-id="sanbei"]     { transition-delay: 0.20s; }
+
+    .recipe-card:hover { filter: brightness(1.03) drop-shadow(2px 4px 6px rgba(29,29,29,0.15)); }
+
+    /* State C — detail: clicked card anchors to left, others fade & shrink. */
+    #recipesSection.state-detail .recipe-card:not(.active) {
+      opacity: 0;
+      pointer-events: none;
+      transition-delay: 0s;
+      transform: translate(-50%, -50%) rotate(var(--fan-rot)) scale(0.8);
+    }
+    #recipesSection.state-detail .recipe-card.active {
+      left: 26%;
+      transform: translate(-50%, -50%) rotate(-1.7deg) scale(1.15);
+      z-index: 10;
+      cursor: default;
+      transition-delay: 0s;
+    }
+    #recipesSection.state-detail .recipe-card.active:hover { filter: none; }
+
+    /* Detail panel (hidden in A/B, fades in on C) */
+    .recipes-detail {
+      position: absolute;
+      top: 50%;
+      left: 70%;
+      transform: translate(-50%, -50%);
+      width: clamp(280px, 38%, 520px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(0.9rem, 2vh, 1.5rem);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease;
+      text-align: center;
+    }
+    #recipesSection.state-detail .recipes-detail {
+      opacity: 1;
+      pointer-events: auto;
+      transition-delay: 0.3s;
+    }
+
+    .recipe-pill {
+      border: 2px solid var(--off-black);
+      border-radius: 100px;
+      padding: 6px 14px;
       font-family: 'Special Elite', cursive;
-      font-size: clamp(0.75rem, 1.6vw, 0.95rem);
-      color: var(--faded);
-      letter-spacing: 0.22em;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
+      color: var(--off-black);
     }
 
-    .recipe-name {
-      font-family: 'Kapra Neue', 'Archivo Black', 'Arial Black', sans-serif;
-      font-size: clamp(1.3rem, 3.8vw, 2.25rem);
-      text-transform: uppercase;
-      line-height: 1.05;
-      max-width: 12ch;
+    .recipe-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
     }
 
-    .recipe-note {
-      font-family: 'Special Elite', cursive;
-      font-size: clamp(0.7rem, 1.5vw, 0.9rem);
-      color: var(--faded);
-      margin-top: 0.5rem;
+    .recipe-title {
+      font-family: 'Funkis A', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.1rem, 1.65vw, 1.5rem);
+      line-height: 1.5;
+      color: var(--off-black);
     }
+
+    .recipe-desc {
+      font-family: 'Funkis A', sans-serif;
+      font-size: clamp(0.9rem, 1.25vw, 1.125rem);
+      line-height: 1.5;
+      color: var(--off-black);
+      max-width: 22em;
+    }
+
+    .recipe-allergens {
+      font-family: 'Funkis A', sans-serif;
+      font-size: 0.875rem;
+      color: #585858;
+      line-height: 1.5;
+    }
+
+    .recipe-dish {
+      width: 100%;
+      max-width: 460px;
+      height: auto;
+      border-radius: 3px;
+      box-shadow:
+        3px 6px 6px rgba(88,88,88,0.55),
+        6px 11px 2px rgba(88,88,88,0.3);
+      margin-top: 0.4rem;
+    }
+
+    /* CTA bar — swaps "Tap to view recipes | Scroll to reward" ↔ "Browse more recipes" */
+    .recipes-cta {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      margin-top: clamp(1rem, 3vh, 2rem);
+      width: 100%;
+    }
+    .cta-group {
+      position: absolute;
+      display: inline-flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: 'Funkis A', sans-serif;
+      font-size: 1rem;
+      color: var(--off-black);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      white-space: nowrap;
+    }
+    #recipesSection.in-view:not(.state-detail) .cta-default {
+      opacity: 1; pointer-events: auto; transition-delay: 0.5s;
+    }
+    #recipesSection.state-detail .cta-browse {
+      opacity: 1; pointer-events: auto; transition-delay: 0.45s;
+    }
+    .cta-group > span, .cta-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .cta-cursor {
+      display: inline-block;
+      width: 14px;
+      height: 20px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 20" fill="%231a1a1a"><path d="M1 1 L1 14.5 L4.2 11.5 L6.8 17.2 L8.6 16.4 L6 10.8 L10.6 10.5 Z" stroke="%231a1a1a" stroke-width="0.5" stroke-linejoin="round"/></svg>') center / contain no-repeat;
+      flex-shrink: 0;
+    }
+    .cta-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--off-black);
+      opacity: 0.6;
+    }
+    .mouse-icon { margin-right: 0; }
 
     /* ─── REWARD SECTION ─── */
     #rewardSection {
@@ -644,6 +827,7 @@
       padding: clamp(3rem, 8vh, 5rem) 2rem;
       text-align: center;
       border-top: 1px solid rgba(0,0,0,0.08);
+      background-color: var(--white);
     }
 
     .reward-label {
@@ -708,10 +892,11 @@
       text-transform: uppercase;
       color: var(--faded);
       border-top: 1px solid rgba(0,0,0,0.08);
+      background-color: var(--white);
     }
 
     /* Keep scroll content hidden until the flow is unlocked */
-    body.locked #recipesScroll,
+    body.locked #recipesSection,
     body.locked #rewardSection,
     body.locked .grain-footer {
       visibility: hidden;
@@ -793,36 +978,47 @@
 
   </section>
 
-  <!-- RECIPES SCROLL SECTION -->
-  <section id="recipesScroll">
-    <h2 class="recipes-heading">The missing recipes — now returned</h2>
+  <!-- RECIPES SECTION (stack → exploded → detail) -->
+  <section id="recipesSection" aria-labelledby="recipesHeading">
+    <h2 id="recipesHeading" class="recipes-heading">The missing recipes — now returned</h2>
 
-    <div class="recipes-stack">
-      <div class="recipe-card">
-        <div class="recipe-number">Recipe 01 — returned</div>
-        <div class="recipe-name">The PB&amp;J</div>
-        <div class="recipe-note">Back on the menu. For real this time.</div>
+    <div class="recipes-stage">
+      <button class="recipe-card" type="button" data-id="pbj" aria-label="The PB&J">
+        <div class="recipe-paper"></div>
+      </button>
+      <button class="recipe-card" type="button" data-id="antipasti" aria-label="Loaded Anti-Pasti Focaccia">
+        <div class="recipe-paper"></div>
+      </button>
+      <button class="recipe-card" type="button" data-id="salmon" aria-label="Confit Salmon Cubes and Pumpkin">
+        <div class="recipe-paper"></div>
+      </button>
+      <button class="recipe-card" type="button" data-id="lotus" aria-label="Wok-Fried Lotus Root and Black Fungus">
+        <div class="recipe-paper"></div>
+      </button>
+      <button class="recipe-card" type="button" data-id="sanbei" aria-label="Sober San Bei Chicken">
+        <div class="recipe-paper"></div>
+      </button>
+
+      <aside class="recipes-detail" aria-live="polite">
+        <div class="recipe-pill" data-pill>missing recipe 01</div>
+        <div class="recipe-info">
+          <h3 class="recipe-title" data-title>The PB&amp;J</h3>
+          <p class="recipe-desc" data-desc></p>
+          <p class="recipe-allergens" data-allergens></p>
+        </div>
+        <img class="recipe-dish" data-img src="" alt="" />
+      </aside>
+    </div>
+
+    <div class="recipes-cta">
+      <div class="cta-group cta-default" aria-hidden="false">
+        <span class="cta-tap"><span class="cta-cursor"></span>Tap to view recipes</span>
+        <span class="cta-divider"></span>
+        <span class="cta-scroll"><span class="mouse-icon" aria-hidden="true"></span>Scroll to your reward</span>
       </div>
-      <div class="recipe-card">
-        <div class="recipe-number">Recipe 02 — returned</div>
-        <div class="recipe-name">Loaded Antipasti Focaccia</div>
-        <div class="recipe-note">Chef Nic almost cried. (Almost.)</div>
-      </div>
-      <div class="recipe-card">
-        <div class="recipe-number">Recipe 03 — returned</div>
-        <div class="recipe-name">Confit Salmon Cubes &amp; Pumpkin</div>
-        <div class="recipe-note">The one that got away, now found.</div>
-      </div>
-      <div class="recipe-card">
-        <div class="recipe-number">Recipe 04 — returned</div>
-        <div class="recipe-name">Wok-Fried Lotus Root &amp; Black Fungus</div>
-        <div class="recipe-note">Crunch restored.</div>
-      </div>
-      <div class="recipe-card">
-        <div class="recipe-number">Recipe 05 — returned</div>
-        <div class="recipe-name">Sober San Bei Chicken</div>
-        <div class="recipe-note">Three cups. Zero regrets.</div>
-      </div>
+      <button class="cta-group cta-browse" type="button">
+        <span class="cta-cursor"></span>Browse more recipes
+      </button>
     </div>
   </section>
 
@@ -902,7 +1098,7 @@
         setTimeout(() => landing.classList.add('stamped'), 1600);
         setTimeout(() => {
           document.body.classList.remove('locked');
-          observeRecipes();
+          setupRecipes();
         }, 3100);
       } else {
         input.classList.add('error');
@@ -923,21 +1119,100 @@
     if (location.hash === '#scroll' || location.hash === '#recipes-only') {
       landing.classList.add('opening', 'stamped');
       document.body.classList.remove('locked');
-      document.querySelectorAll('.recipe-card').forEach(e => e.classList.add('visible'));
       if (location.hash === '#recipes-only') {
         document.getElementById('landing').style.display = 'none';
       }
       requestAnimationFrame(() => {
-        document.getElementById('recipesScroll').scrollIntoView();
+        document.getElementById('recipesSection').scrollIntoView();
+        setupRecipes();
       });
     }
 
-    function observeRecipes() {
-      const entries = document.querySelectorAll('.recipe-card');
-      const observer = new IntersectionObserver((items) => {
-        items.forEach(item => { if (item.isIntersecting) item.target.classList.add('visible'); });
-      }, { threshold: 0.15 });
-      entries.forEach(e => observer.observe(e));
+    // ─── Recipes state machine: stack → exploded → detail ───
+    const RECIPES_DATA = {
+      pbj: {
+        number: '01',
+        title: 'The PB&J',
+        desc: 'crunchy white chocolate peanut butter, citrus strawberry jam',
+        allergens: 'contains dairy, nuts, soy, wheat',
+        image: 'assets/dishes/pbj.jpg',
+      },
+      antipasti: {
+        number: '02',
+        title: 'Loaded Anti-Pasti Focaccia',
+        desc: 'herb oil, sundried tomatoes, artichoke, olives, mozzarella, cheddar',
+        allergens: 'contains dairy, wheat',
+        image: 'assets/dishes/antipasti.jpg',
+      },
+      salmon: {
+        number: '03',
+        title: 'Confit Salmon Cubes and Pumpkin',
+        desc: 'garlic cream sauce, pickled artichoke, wilted kale',
+        allergens: 'contains allium, dairy, wheat',
+        image: 'assets/dishes/salmon.jpg',
+      },
+      lotus: {
+        number: '04',
+        title: 'Wok-Fried Lotus Root and Black Fungus',
+        desc: 'oil-poached ginko nut, pressed tofu, vegetarian superior stock',
+        allergens: 'contains nuts, soy, wheat',
+        image: 'assets/dishes/lotus.jpg',
+      },
+      sanbei: {
+        number: '05',
+        title: 'Sober San Bei Chicken',
+        desc: 'oil-poached chicken, superior oyster sauce, aged ginger',
+        allergens: 'contains dairy, nuts, shellfish, wheat',
+        image: 'assets/dishes/sanbei.jpg',
+      },
+    };
+
+    function setupRecipes() {
+      const section = document.getElementById('recipesSection');
+      if (!section || section.dataset.ready) return;
+      section.dataset.ready = '1';
+
+      const cards = section.querySelectorAll('.recipe-card');
+      const pill = section.querySelector('[data-pill]');
+      const title = section.querySelector('[data-title]');
+      const desc = section.querySelector('[data-desc]');
+      const allergens = section.querySelector('[data-allergens]');
+      const dishImg = section.querySelector('[data-img]');
+      const browseBtn = section.querySelector('.cta-browse');
+
+      // Reveal on scroll-into-view, then auto-advance from stacked to exploded.
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !section.classList.contains('in-view')) {
+            section.classList.add('in-view');
+            setTimeout(() => section.classList.add('state-exploded'), 850);
+            io.disconnect();
+          }
+        }
+      }, { threshold: 0.3 });
+      io.observe(section);
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          if (!section.classList.contains('state-exploded')) return;
+          if (card.classList.contains('active')) return;
+          const data = RECIPES_DATA[card.dataset.id];
+          if (!data) return;
+          cards.forEach(c => c.classList.toggle('active', c === card));
+          pill.textContent = `missing recipe ${data.number}`;
+          title.textContent = data.title;
+          desc.textContent = data.desc;
+          allergens.textContent = data.allergens;
+          dishImg.src = data.image;
+          dishImg.alt = data.title;
+          section.classList.add('state-detail');
+        });
+      });
+
+      browseBtn.addEventListener('click', () => {
+        section.classList.remove('state-detail');
+        cards.forEach(c => c.classList.remove('active'));
+      });
     }
   </script>
 </body>

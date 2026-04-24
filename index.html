@@ -123,16 +123,19 @@
       filter: drop-shadow(10px 10px 2px rgba(29,29,29,0.8));
     }
 
-    /* Content on the sketchbook — sits within the measured front-cover bounds
-       of sketchbook.png (alpha bbox: 27% top / 28% left / 54% × 54%). */
+    /* Content on the sketchbook — centered on the visible page (alpha bbox
+       of sketchbook.png: 27% top / 28% left / 54% × 54%, so center is 55%, 54%).
+       container-type enables cqw units below, which match the Figma spec
+       (450px page → 60px heading = 13.33cqw etc.) regardless of book size. */
     .sketchbook-content {
       position: absolute;
-      top: 28%;
-      left: 30%;
+      top: 54%;
+      left: 55%;
       width: 51%;
       height: 52%;
-      transform: rotate(1.1deg);
+      transform: translate(-50%, -50%) rotate(1.1deg);
       transform-origin: center center;
+      container-type: inline-size;
       padding: 2% 4%;
       display: flex;
       flex-direction: column;
@@ -145,7 +148,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(1.5rem, 4.8vw, 4.5rem);
+      gap: clamp(1.5rem, 16cqw, 5rem);
       flex: 1;
       justify-content: center;
       width: 100%;
@@ -155,14 +158,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(0.6rem, 1.6vw, 1.5rem);
+      gap: clamp(0.5rem, 5.33cqw, 1.75rem);
     }
 
     /* Stamp label on book */
     .stamp-label-book {
       font-family: 'Special Elite', cursive;
-      font-size: clamp(0.6rem, 1vw, 0.9rem);
-      letter-spacing: 0.11em;
+      font-size: clamp(0.65rem, 4cqw, 1.15rem);
+      letter-spacing: 0.44cqw;
       text-transform: uppercase;
       color: var(--grey);
       opacity: 0;
@@ -172,8 +175,8 @@
 
     .heading-book {
       font-family: 'Kapra Neue', 'Archivo Black', 'Arial Black', sans-serif;
-      font-size: clamp(1.4rem, 3.4vw, 2.85rem);
-      line-height: 1;
+      font-size: clamp(1.5rem, 13.33cqw, 4rem);
+      line-height: normal;
       letter-spacing: 0;
       text-align: center;
       color: var(--white);
@@ -185,7 +188,7 @@
 
     .subtext-book {
       font-family: 'Funkis A', 'DM Sans', sans-serif;
-      font-size: clamp(0.7rem, 1.1vw, 0.95rem);
+      font-size: clamp(0.75rem, 4cqw, 1.25rem);
       color: var(--white);
       text-align: center;
       line-height: 1.5;
@@ -199,9 +202,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(0.7rem, 1.5vw, 1.25rem);
-      width: 100%;
-      max-width: 90%;
+      gap: clamp(1rem, 8cqw, 2.5rem);
+      width: 84%;
       opacity: 0;
       animation: fadeIn 0.5s ease forwards;
       animation-delay: 2.1s;
@@ -210,11 +212,11 @@
     .input-field-book {
       width: 100%;
       background: transparent;
-      border: 2px solid var(--grey);
-      border-radius: 5px;
-      padding: 0.55em 0.9em;
+      border: clamp(2px, 0.67cqw, 3px) solid var(--grey);
+      border-radius: clamp(3px, 1.11cqw, 5px);
+      padding: 3cqw 0.33cqw;
       font-family: 'Funkis A', 'DM Sans', sans-serif;
-      font-size: clamp(0.7rem, 1.1vw, 0.95rem);
+      font-size: clamp(0.75rem, 4cqw, 1.25rem);
       color: var(--white);
       text-align: center;
       outline: none;
@@ -232,7 +234,7 @@
     }
 
     .error-msg {
-      font-size: clamp(0.55rem, 1vw, 0.8rem);
+      font-size: clamp(0.55rem, 3.11cqw, 0.9rem);
       color: #e74c3c;
       font-style: italic;
       opacity: 0;
@@ -247,13 +249,13 @@
       background: var(--yellow);
       color: var(--ink);
       border: none;
-      padding: 0.55em 1.15em;
+      padding: 2.67cqw 5.33cqw;
       font-family: 'Funkis A', 'DM Sans', sans-serif;
-      font-size: clamp(0.7rem, 1.1vw, 0.95rem);
+      font-size: clamp(0.75rem, 4cqw, 1.25rem);
       font-weight: 700;
       text-transform: none;
       cursor: pointer;
-      border-radius: 2.5px;
+      border-radius: clamp(2px, 0.56cqw, 3px);
       transition: transform 0.1s, filter 0.2s;
     }
     .submit-btn-book:hover { filter: brightness(1.05); transform: translateY(-1px); }
@@ -261,7 +263,7 @@
 
     .footer-note-book {
       font-family: 'Special Elite', cursive;
-      font-size: clamp(0.55rem, 0.85vw, 0.8rem);
+      font-size: clamp(0.6rem, 3.11cqw, 1rem);
       color: var(--grey);
       opacity: 0;
       animation: fadeIn 0.5s ease forwards;

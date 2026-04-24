@@ -99,11 +99,11 @@
       opacity: 0.5;
     }
 
-    /* Sketchbook container */
+    /* Sketchbook container — aspect ratio matches Figma sketchbook (600x850) */
     .sketchbook-wrap {
       position: relative;
       z-index: 1;
-      width: min(750px, 90vw);
+      width: min(620px, 88vw);
       aspect-ratio: 600 / 850;
       animation: slideUp 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
     }
@@ -122,14 +122,14 @@
       filter: drop-shadow(10px 10px 2px rgba(29,29,29,0.8));
     }
 
-    /* Content on the sketchbook */
+    /* Content on the sketchbook — fills the front cover, rotated 1.1deg per Figma */
     .sketchbook-content {
       position: absolute;
-      top: 10%;
-      left: 54%;
-      transform: translateX(-50%) rotate(1.1deg);
-      width: 70%;
-      height: 82%;
+      inset: 0;
+      /* shift right to land on the front cover (right page) of the sketchbook */
+      transform: translateX(4%) rotate(1.1deg);
+      /* top/right/bottom/left padding mirrors Figma: label at ~5%, url at ~6%, content inset ~12-15% sides */
+      padding: 4.4% 14% 6% 14%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -141,7 +141,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(1.2rem, 3vw, 2.25rem);
+      gap: clamp(1.5rem, 4.8vw, 4.5rem);
       flex: 1;
       justify-content: center;
       width: 100%;
@@ -151,13 +151,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(0.8rem, 1.6vw, 1.5rem);
+      gap: clamp(0.6rem, 1.6vw, 1.5rem);
     }
 
     /* Stamp label on book */
     .stamp-label-book {
       font-family: 'Special Elite', cursive;
-      font-size: clamp(0.7rem, 1.2vw, 1.125rem);
+      font-size: clamp(0.7rem, 1.25vw, 1.125rem);
       letter-spacing: 0.11em;
       text-transform: uppercase;
       color: var(--grey);
@@ -168,9 +168,9 @@
 
     .heading-book {
       font-family: 'Kapra Neue', 'Archivo Black', 'Arial Black', sans-serif;
-      font-size: clamp(1.8rem, 4.6vw, 3.75rem);
+      font-size: clamp(1.6rem, 4vw, 3.35rem);
       line-height: 1;
-      letter-spacing: 0.01em;
+      letter-spacing: 0;
       text-align: center;
       color: var(--white);
       text-transform: uppercase;
@@ -196,7 +196,8 @@
       flex-direction: column;
       align-items: center;
       gap: clamp(1rem, 2vw, 1.75rem);
-      width: 90%;
+      width: 100%;
+      max-width: 85%;
       opacity: 0;
       animation: fadeIn 0.5s ease forwards;
       animation-delay: 2.1s;
@@ -205,7 +206,7 @@
     .input-field-book {
       width: 100%;
       background: transparent;
-      border: 3px solid var(--grey);
+      border: 2.5px solid var(--grey);
       border-radius: 5px;
       padding: 0.75em 1em;
       font-family: 'Funkis A', 'DM Sans', sans-serif;

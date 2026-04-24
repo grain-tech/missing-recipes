@@ -71,8 +71,8 @@
     #landing {
       position: relative;
       z-index: 1;
-      min-height: 100vh;
-      min-height: 100dvh;
+      height: 100vh;
+      height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -100,11 +100,13 @@
     }
 
     /* Sketchbook container — aspect ratio matches sketchbook.png (2734x4096) so
-       percentage positions line up with the visible book inside the PNG. */
+       percentage positions line up with the visible book inside the PNG.
+       Width is capped by viewport width AND height (via aspect ratio) so the
+       book always fits the viewport and stays centered. */
     .sketchbook-wrap {
       position: relative;
       z-index: 1;
-      width: min(1000px, 96vw);
+      width: min(1000px, 96vw, calc(100dvh * 2734 / 4096));
       aspect-ratio: 2734 / 4096;
       animation: slideUp 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
     }

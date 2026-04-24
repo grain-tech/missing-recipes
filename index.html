@@ -829,72 +829,180 @@
     }
     .mouse-icon { margin-right: 0; }
 
-    /* ─── REWARD SECTION ─── */
+    /* ─── REWARD SECTION (flip card) ─── */
     #rewardSection {
       position: relative;
       z-index: 1;
-      min-height: 80vh;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(3rem, 8vh, 5rem) 2rem;
+      background-color: var(--white);
+      perspective: 2400px;
+    }
+
+    .reward-flip-wrap {
+      width: min(540px, 88vw, 72dvh);
+      aspect-ratio: 595 / 842;
+      position: relative;
+    }
+
+    .reward-flip {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateY(0deg);
+      transition: transform 1.15s cubic-bezier(0.45, 0.15, 0.25, 1);
+    }
+    #rewardSection.flipped .reward-flip { transform: rotateY(180deg); }
+
+    .reward-face {
+      position: absolute;
+      inset: 0;
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+      background: #f6f2ec;
+      box-shadow: 1px 1px 3px 1px rgba(88,88,88,0.3);
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow: hidden;
+    }
+
+    /* Front: just the party popper centered */
+    .reward-face--front {
       justify-content: center;
-      gap: 1.25rem;
-      padding: clamp(3rem, 8vh, 5rem) 2rem;
-      text-align: center;
-      border-top: 1px solid rgba(0,0,0,0.08);
-      background-color: var(--white);
+      padding: clamp(2rem, 6vh, 4rem);
     }
-
-    .reward-label {
-      font-family: 'Special Elite', cursive;
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--faded);
-    }
-
-    .reward-msg {
-      font-size: 0.95rem;
-      color: var(--off-black);
-      line-height: 1.7;
+    .reward-popper {
+      width: 78%;
       max-width: 380px;
+      height: auto;
+      display: block;
     }
 
-    .reward-code {
+    /* Back: rotated 180 so it reads correctly when the card flips */
+    .reward-face--back {
+      transform: rotateY(180deg);
+      padding: clamp(1.75rem, 4vh, 2.75rem) clamp(1.5rem, 4vw, 2.75rem);
+    }
+
+    .reward-back-label {
       font-family: 'Special Elite', cursive;
-      font-size: clamp(1.8rem, 6vw, 2.8rem);
-      letter-spacing: 0.2em;
-      color: var(--black);
-      background: var(--yellow);
-      padding: 0.6rem 1.5rem;
-      transform: rotate(-1deg);
-      display: inline-block;
+      font-size: clamp(0.7rem, 1.1vw, 0.88rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--off-black);
     }
 
-    .reward-terms {
-      font-size: 0.78rem;
-      color: var(--faded);
-      font-style: italic;
-      line-height: 1.9;
-      max-width: 320px;
+    .reward-ticket {
+      border: none;
+      background: none;
+      padding: 0;
+      margin: clamp(0.9rem, 2.2vh, 1.5rem) 0 0;
+      cursor: pointer;
+      transform: rotate(-1.63deg);
+      transition: transform 0.18s ease;
+      position: relative;
+    }
+    .reward-ticket:hover  { transform: rotate(-1.63deg) translateY(-2px) scale(1.02); }
+    .reward-ticket:active { transform: rotate(-1.63deg) scale(0.98); }
+
+    .reward-ticket-code {
+      display: inline-block;
+      font-family: 'Kapra Neue', 'Archivo Black', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 4.8vw, 2.75rem);
+      letter-spacing: 0.02em;
+      color: var(--off-black);
+      background: var(--yellow);
+      padding: clamp(0.55rem, 1.4vw, 0.9rem) clamp(1.6rem, 3.6vw, 2.25rem);
+      border-radius: 4px;
+      /* Ticket notches on left/right edges via radial-gradient mask */
+      -webkit-mask:
+        radial-gradient(circle at 0 50%,   transparent 9px, #000 9.5px) left  / 51% 100% no-repeat,
+        radial-gradient(circle at 100% 50%, transparent 9px, #000 9.5px) right / 51% 100% no-repeat;
+              mask:
+        radial-gradient(circle at 0 50%,   transparent 9px, #000 9.5px) left  / 51% 100% no-repeat,
+        radial-gradient(circle at 100% 50%, transparent 9px, #000 9.5px) right / 51% 100% no-repeat;
+      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.12));
+    }
+
+    .reward-thanks {
+      font-family: 'Funkis A', sans-serif;
+      font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+      line-height: 1.5;
+      color: var(--off-black);
       text-align: center;
+      margin: clamp(1rem, 2.4vh, 1.5rem) auto 0;
+      max-width: 92%;
+    }
+
+    .reward-terms-box {
+      width: 92%;
+      border: 1px solid #e0dcd7;
+      border-radius: 10px;
+      padding: clamp(0.9rem, 1.8vh, 1.25rem) clamp(1rem, 2.4vw, 1.4rem);
+      margin-top: clamp(1rem, 2.2vh, 1.5rem);
+      background: #fffcf7;
+      box-shadow: 0 0 20px rgba(239,239,239,0.5);
+      text-align: center;
+      font-family: 'Funkis A', sans-serif;
+      color: var(--off-black);
+    }
+    .reward-terms-headline {
+      font-weight: 700;
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      margin: 0 0 0.35rem;
+    }
+    .reward-terms-line {
+      font-size: clamp(0.8rem, 1.05vw, 0.95rem);
+      line-height: 1.4;
+      margin: 0.1rem 0;
+    }
+
+    .reward-cta-stack {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(0.6rem, 1.5vh, 1.1rem);
     }
 
     .cta-btn {
       background: var(--black);
       color: var(--white);
       border: none;
-      padding: 0.85rem 2.5rem;
+      padding: clamp(0.7rem, 1.4vh, 0.9rem) clamp(1.6rem, 3vw, 2.5rem);
       font-family: 'Funkis A', 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
+      font-size: clamp(0.85rem, 1.1vw, 1rem);
+      font-weight: 700;
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
+      border-radius: 3px;
       transition: background 0.2s, transform 0.1s;
     }
     .cta-btn:hover { background: var(--ink); transform: translateY(-1px); }
+
+    .reward-copy-link {
+      background: none;
+      border: none;
+      color: var(--off-black);
+      font-family: 'Funkis A', sans-serif;
+      font-weight: 700;
+      font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      transition: color 0.15s ease;
+    }
+    .reward-copy-link:hover { color: #555; }
+    .reward-copy-link.copied { color: #2a8f4b; text-decoration: none; cursor: default; }
 
     .grain-footer {
       position: relative;
@@ -1039,18 +1147,32 @@
 
   <!-- REWARD SECTION -->
   <section id="rewardSection">
-    <div class="reward-label">Your reward</div>
-    <p class="reward-msg">
-      Thanks to you, this dish is making it to June's menu launch.<br>
-      You've earned yourself a little something.
-    </p>
-    <div class="reward-code">FOUNDIT10</div>
-    <p class="reward-terms">
-      <strong>10% off catering, capped at $100.</strong><br>
-      Valid for events in June and July.<br>
-      Enter code at checkout. Not valid with ongoing promotions.
-    </p>
-    <a href="https://grain.com.sg/whats-cooking-june-26" class="cta-btn">Book your buffet</a>
+    <div class="reward-flip-wrap">
+      <div class="reward-flip">
+        <div class="reward-face reward-face--front">
+          <img class="reward-popper" src="assets/popper.png" alt="" />
+        </div>
+        <div class="reward-face reward-face--back">
+          <div class="reward-back-label">Your reward</div>
+          <button class="reward-ticket" type="button" data-copy="FOUNDIT10" aria-label="Copy promo code FOUNDIT10">
+            <span class="reward-ticket-code">FOUNDIT10</span>
+          </button>
+          <p class="reward-thanks">
+            Thanks to you, this dish is making it to June's menu launch.<br>
+            You've earned yourself a little something.
+          </p>
+          <div class="reward-terms-box">
+            <p class="reward-terms-headline">10% off catering, capped at $100</p>
+            <p class="reward-terms-line">Valid for events in June and July.</p>
+            <p class="reward-terms-line">Enter code at checkout. Not valid with ongoing promotions.</p>
+          </div>
+          <div class="reward-cta-stack">
+            <a href="https://grain.com.sg/whats-cooking-june-26" class="cta-btn">Book your buffet</a>
+            <button class="reward-copy-link" type="button" data-copy="FOUNDIT10">Copy code</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <footer class="grain-footer">Grain<br>grain.com.sg/missingrecipes</footer>
@@ -1131,14 +1253,15 @@
       input.value = 'the pb&j';
       requestAnimationFrame(attempt);
     }
-    if (location.hash === '#scroll' || location.hash === '#recipes-only') {
+    if (location.hash === '#scroll' || location.hash === '#recipes-only' || location.hash === '#reward') {
       landing.classList.add('opening', 'stamped');
       document.body.classList.remove('locked');
       if (location.hash === '#recipes-only') {
         document.getElementById('landing').style.display = 'none';
       }
       requestAnimationFrame(() => {
-        document.getElementById('recipesSection').scrollIntoView();
+        const target = location.hash === '#reward' ? 'rewardSection' : 'recipesSection';
+        document.getElementById(target).scrollIntoView();
         setupRecipes();
       });
     }
@@ -1229,6 +1352,54 @@
         cards.forEach(c => c.classList.remove('active'));
       });
     }
+
+    // ─── Reward card: flip on scroll into view, flip back when scrolled above ───
+    (function setupReward() {
+      const section = document.getElementById('rewardSection');
+      if (!section) return;
+
+      // Flip is driven by scroll position, not IntersectionObserver, so the
+      // card stays on its back once the user has scrolled into or past it
+      // (only scrolling back up above the section unflips it).
+      const updateFlip = () => {
+        const rect = section.getBoundingClientRect();
+        const trigger = window.innerHeight * 0.6;
+        section.classList.toggle('flipped', rect.top < trigger);
+      };
+      window.addEventListener('scroll', updateFlip, { passive: true });
+      window.addEventListener('resize', updateFlip);
+      updateFlip();
+
+      // Copy FOUNDIT10 on ticket click or "Copy code" link click.
+      const copyLink = section.querySelector('.reward-copy-link');
+      const originalLabel = copyLink ? copyLink.textContent : 'Copy code';
+      let revertTimer = 0;
+
+      const copyCode = async (code) => {
+        try {
+          await navigator.clipboard.writeText(code);
+        } catch {
+          // Fallback for older browsers / insecure contexts.
+          const ta = document.createElement('textarea');
+          ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); } catch {}
+          document.body.removeChild(ta);
+        }
+        if (!copyLink) return;
+        copyLink.textContent = 'Copied';
+        copyLink.classList.add('copied');
+        clearTimeout(revertTimer);
+        revertTimer = setTimeout(() => {
+          copyLink.textContent = originalLabel;
+          copyLink.classList.remove('copied');
+        }, 2000);
+      };
+
+      section.querySelectorAll('[data-copy]').forEach(el => {
+        el.addEventListener('click', () => copyCode(el.dataset.copy));
+      });
+    })();
   </script>
 </body>
 </html>

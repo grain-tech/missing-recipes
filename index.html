@@ -211,23 +211,42 @@
       animation-delay: 2.1s;
     }
 
+    /* Input field — border lives on a wrapper so we can apply an SVG
+       displacement filter for a hand-drawn sketchbook feel without
+       distorting the text inside. */
+    .input-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .input-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: clamp(2.5px, 0.75cqw, 3.5px) solid var(--grey);
+      border-radius: clamp(4px, 1.22cqw, 6px);
+      filter: url(#sketchyBorder);
+      pointer-events: none;
+      transition: border-color 0.2s;
+    }
+    .input-wrap:has(.input-field-book:focus)::before { border-color: var(--yellow); }
+    .input-wrap:has(.input-field-book.error)::before {
+      border-color: #e74c3c;
+      animation: shake 0.3s ease;
+    }
+
     .input-field-book {
       width: 100%;
       background: transparent;
-      border: clamp(2px, 0.67cqw, 3px) solid var(--grey);
-      border-radius: clamp(3px, 1.11cqw, 5px);
+      border: none;
       padding: 3cqw 0.33cqw;
       font-family: 'Funkis A', 'DM Sans', sans-serif;
       font-size: clamp(0.75rem, 4cqw, 1.25rem);
       color: var(--white);
       text-align: center;
       outline: none;
-      transition: border-color 0.2s;
     }
 
     .input-field-book::placeholder { color: var(--grey); }
-    .input-field-book:focus { border-color: var(--yellow); }
-    .input-field-book.error { border-color: #e74c3c; animation: shake 0.3s ease; }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -511,6 +530,16 @@
 </head>
 <body>
 
+  <!-- SVG filter — subtle displacement for hand-drawn borders/strokes -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="sketchyBorder">
+        <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="7" />
+        <feDisplacementMap in="SourceGraphic" scale="1.6" />
+      </filter>
+    </defs>
+  </svg>
+
   <!-- LANDING -->
   <section id="landing">
     <div class="landing-bg"></div>
@@ -524,7 +553,9 @@
             <p class="subtext-book">Chef Nic's been looking everywhere.<br>Which one did you find?</p>
           </div>
           <div class="book-form">
-            <input class="input-field-book" id="recipeInput" type="text" placeholder="Type the dish name here…" autocomplete="off" spellcheck="false" />
+            <div class="input-wrap">
+              <input class="input-field-book" id="recipeInput" type="text" placeholder="Type the dish name here…" autocomplete="off" spellcheck="false" />
+            </div>
             <div class="error-msg" id="errorMsg">That doesn't match any of our missing recipes.</div>
             <button class="submit-btn-book" id="submitBtn">Return the recipe</button>
           </div>

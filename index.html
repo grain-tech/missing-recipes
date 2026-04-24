@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Missing Recipe — Grain Test Kitchen</title>
-  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Special+Elite&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -85,49 +85,52 @@
     /* Content on the sketchbook */
     .sketchbook-content {
       position: absolute;
-      top: 52%;
+      top: 10%;
       left: 54%;
-      transform: translate(-50%, -50%) rotate(1.1deg);
-      width: 65%;
+      transform: translateX(-50%) rotate(1.1deg);
+      width: 70%;
+      height: 82%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(2rem, 5vw, 4.5rem);
+      justify-content: space-between;
       z-index: 2;
+    }
+
+    .book-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(1.2rem, 3vw, 2.25rem);
+      flex: 1;
+      justify-content: center;
+      width: 100%;
     }
 
     .book-top {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(0.8rem, 2vw, 1.5rem);
+      gap: clamp(0.8rem, 1.6vw, 1.5rem);
     }
 
     /* Stamp label on book */
     .stamp-label-book {
       font-family: 'Special Elite', cursive;
-      font-size: clamp(0.55rem, 1.2vw, 1.125rem);
-      letter-spacing: 0.12em;
+      font-size: clamp(0.7rem, 1.2vw, 1.125rem);
+      letter-spacing: 0.11em;
       text-transform: uppercase;
       color: var(--grey);
-      border: 2px solid var(--grey);
-      padding: 0.35em 0.8em;
-      transform: rotate(-1deg);
       opacity: 0;
-      animation: stampSlam 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+      animation: fadeIn 0.5s ease forwards;
       animation-delay: 1.1s;
     }
 
-    @keyframes stampSlam {
-      0%   { opacity: 0; transform: rotate(-1deg) scale(2.5); }
-      60%  { opacity: 1; transform: rotate(-1deg) scale(0.95); }
-      100% { opacity: 1; transform: rotate(-1deg) scale(1); }
-    }
-
     .heading-book {
-      font-family: 'Special Elite', cursive;
-      font-size: clamp(1.4rem, 4.2vw, 3.75rem);
-      line-height: 1.1;
+      font-family: 'Archivo Black', 'Arial Black', sans-serif;
+      font-size: clamp(1.8rem, 4.6vw, 3.75rem);
+      line-height: 1;
+      letter-spacing: 0.01em;
       text-align: center;
       color: var(--white);
       text-transform: uppercase;
@@ -138,7 +141,7 @@
 
     .subtext-book {
       font-family: 'DM Sans', sans-serif;
-      font-size: clamp(0.65rem, 1.3vw, 1.125rem);
+      font-size: clamp(0.8rem, 1.25vw, 1.125rem);
       color: var(--white);
       text-align: center;
       line-height: 1.5;
@@ -152,8 +155,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(1rem, 2.5vw, 2.25rem);
-      width: 94%;
+      gap: clamp(1rem, 2vw, 1.75rem);
+      width: 90%;
       opacity: 0;
       animation: fadeIn 0.5s ease forwards;
       animation-delay: 2.1s;
@@ -162,11 +165,11 @@
     .input-field-book {
       width: 100%;
       background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--white);
-      padding: 0.6em 0.25em;
+      border: 3px solid var(--grey);
+      border-radius: 5px;
+      padding: 0.75em 1em;
       font-family: 'DM Sans', sans-serif;
-      font-size: clamp(0.65rem, 1.3vw, 1.125rem);
+      font-size: clamp(0.8rem, 1.25vw, 1.125rem);
       color: var(--white);
       text-align: center;
       outline: none;
@@ -199,9 +202,9 @@
       background: var(--yellow);
       color: var(--ink);
       border: none;
-      padding: 0.6em 1.5em;
+      padding: 0.65em 1.35em;
       font-family: 'DM Sans', sans-serif;
-      font-size: clamp(0.65rem, 1.3vw, 1.125rem);
+      font-size: clamp(0.8rem, 1.25vw, 1.125rem);
       font-weight: 700;
       text-transform: none;
       cursor: pointer;
@@ -212,9 +215,12 @@
     .submit-btn-book:active { transform: translateY(0); }
 
     .footer-note-book {
-      font-family: 'DM Sans', sans-serif;
-      font-size: clamp(0.5rem, 0.9vw, 0.875rem);
-      color: var(--grey-light);
+      font-family: 'Special Elite', cursive;
+      font-size: clamp(0.65rem, 0.95vw, 0.875rem);
+      color: var(--grey);
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: 2.3s;
     }
 
     @keyframes fadeIn {
@@ -462,17 +468,19 @@
     <div class="sketchbook-wrap">
       <img class="sketchbook-img" src="sketchbook.png" alt="" />
       <div class="sketchbook-content">
-        <div class="book-top">
-          <div class="stamp-label-book">Grain Test Kitchen</div>
-          <h1 class="heading-book">You found a<br>missing recipe.</h1>
-          <p class="subtext-book">Chef Nic's been looking everywhere.<br>Which one did you find?</p>
+        <div class="stamp-label-book">Grain Test Kitchen</div>
+        <div class="book-body">
+          <div class="book-top">
+            <h1 class="heading-book">You found a<br>missing recipe.</h1>
+            <p class="subtext-book">Chef Nic's been looking everywhere.<br>Which one did you find?</p>
+          </div>
+          <div class="book-form">
+            <input class="input-field-book" id="recipeInput" type="text" placeholder="Type the dish name here…" autocomplete="off" spellcheck="false" />
+            <div class="error-msg" id="errorMsg">That doesn't match any of our missing recipes.</div>
+            <button class="submit-btn-book" id="submitBtn">Return the recipe</button>
+          </div>
         </div>
-        <div class="book-form">
-          <input class="input-field-book" id="recipeInput" type="text" placeholder="Type the dish name here…" autocomplete="off" spellcheck="false" />
-          <div class="error-msg" id="errorMsg">That doesn't match any of our missing recipes.</div>
-          <button class="submit-btn-book" id="submitBtn">Return the recipe</button>
-          <p class="footer-note-book">grain.com.sg/missing-recipes</p>
-        </div>
+        <p class="footer-note-book">grain.com.sg/missing-recipes</p>
       </div>
     </div>
   </section>

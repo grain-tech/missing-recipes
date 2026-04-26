@@ -871,7 +871,7 @@
       inset: 0;
       -webkit-backface-visibility: hidden;
               backface-visibility: hidden;
-      background: #f6f2ec;
+      background: #fffcf7;
       box-shadow: 1px 1px 3px 1px rgba(88,88,88,0.3);
       display: flex;
       flex-direction: column;
@@ -891,106 +891,154 @@
       display: block;
     }
 
-    /* Back: rotated 180 so it reads correctly when the card flips */
+    /* Back: laid out to match Figma node 2169:1089 (595×842 card).
+       container-type: size lets every child use cqw/cqh so the layout
+       scales precisely with the card no matter how big it renders. */
     .reward-face--back {
       transform: rotateY(180deg);
-      padding: clamp(1.75rem, 4vh, 2.75rem) clamp(1.5rem, 4vw, 2.75rem);
+      padding: 0;
+      container-type: size;
+      display: block;
     }
 
+    /* "your reward" label — Figma: 18px Special Elite, centered, top: 69px */
     .reward-back-label {
+      position: absolute;
+      top: 8.2cqh;
+      left: 50%;
+      transform: translateX(-50%);
       font-family: 'Special Elite', cursive;
-      font-size: clamp(0.7rem, 1.1vw, 0.88rem);
+      font-size: 3.025cqw;
       letter-spacing: 0.22em;
+      line-height: 1;
       text-transform: uppercase;
       color: var(--off-black);
     }
 
+    /* Ticket — Figma: 334.326 × 175.811, top: 117.67px, rotate -1.63deg.
+       Centered horizontally on the card. The yellow ticket shape is drawn
+       with a radial-gradient mask cutting notches into the left/right
+       edges; the FOUNDIT10 text is centered inside. */
     .reward-ticket {
+      position: absolute;
+      top: 13.97cqh;
+      left: 50%;
+      width: 56.19cqw;
+      height: 20.88cqh;
       border: none;
       background: none;
       padding: 0;
-      margin: clamp(0.9rem, 2.2vh, 1.5rem) 0 0;
+      margin: 0;
       cursor: pointer;
-      transform: rotate(-1.63deg);
+      transform: translateX(-50%) rotate(-1.63deg);
       transition: transform 0.18s ease;
-      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .reward-ticket:hover  { transform: rotate(-1.63deg) translateY(-2px) scale(1.02); }
-    .reward-ticket:active { transform: rotate(-1.63deg) scale(0.98); }
+    .reward-ticket:hover  { transform: translateX(-50%) rotate(-1.63deg) translateY(-2px) scale(1.02); }
+    .reward-ticket:active { transform: translateX(-50%) rotate(-1.63deg) scale(0.98); }
 
     .reward-ticket-code {
-      display: inline-block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
       font-family: 'Kapra Neue', 'Archivo Black', sans-serif;
       font-weight: 900;
-      font-size: clamp(1.8rem, 4.8vw, 2.75rem);
+      font-size: 8.07cqw;
       letter-spacing: 0.02em;
       color: var(--off-black);
       background: var(--yellow);
-      padding: clamp(0.55rem, 1.4vw, 0.9rem) clamp(1.6rem, 3.6vw, 2.25rem);
       border-radius: 4px;
-      /* Ticket notches on left/right edges via radial-gradient mask */
+      /* Ticket notches on left/right edges */
       -webkit-mask:
-        radial-gradient(circle at 0 50%,   transparent 9px, #000 9.5px) left  / 51% 100% no-repeat,
-        radial-gradient(circle at 100% 50%, transparent 9px, #000 9.5px) right / 51% 100% no-repeat;
+        radial-gradient(circle at 0 50%,   transparent 1.7cqh, #000 calc(1.7cqh + 0.5px)) left  / 51% 100% no-repeat,
+        radial-gradient(circle at 100% 50%, transparent 1.7cqh, #000 calc(1.7cqh + 0.5px)) right / 51% 100% no-repeat;
               mask:
-        radial-gradient(circle at 0 50%,   transparent 9px, #000 9.5px) left  / 51% 100% no-repeat,
-        radial-gradient(circle at 100% 50%, transparent 9px, #000 9.5px) right / 51% 100% no-repeat;
+        radial-gradient(circle at 0 50%,   transparent 1.7cqh, #000 calc(1.7cqh + 0.5px)) left  / 51% 100% no-repeat,
+        radial-gradient(circle at 100% 50%, transparent 1.7cqh, #000 calc(1.7cqh + 0.5px)) right / 51% 100% no-repeat;
       filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.12));
     }
 
+    /* Thanks block — Figma: top: 334.06px, left: 48px, width: 498px,
+       Funkis A Regular 24px, gap 12px between paragraphs. */
     .reward-thanks {
+      position: absolute;
+      top: 39.67cqh;
+      left: 8.07cqw;
+      width: 83.7cqw;
+      margin: 0;
       font-family: 'Funkis A', sans-serif;
-      font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+      font-size: 4.034cqw;
       line-height: 1.5;
       color: var(--off-black);
       text-align: center;
-      margin: clamp(1rem, 2.4vh, 1.5rem) auto 0;
-      max-width: 92%;
     }
 
+    /* Terms box — Figma: top: 484px, left: 48px, width: 498px, padding 24px,
+       gap 12px, bg dinnerplate-white-light, border grey-light, radius 10px. */
     .reward-terms-box {
-      width: 92%;
-      border: 1px solid #e0dcd7;
+      position: absolute;
+      top: 57.48cqh;
+      left: 8.07cqw;
+      width: 83.7cqw;
+      box-sizing: border-box;
+      padding: 4.034cqw;
+      border: 1px solid var(--grey-light);
       border-radius: 10px;
-      padding: clamp(0.9rem, 1.8vh, 1.25rem) clamp(1rem, 2.4vw, 1.4rem);
-      margin-top: clamp(1rem, 2.2vh, 1.5rem);
-      background: #fffcf7;
+      background: #f6f2ed;
       box-shadow: 0 0 20px rgba(239,239,239,0.5);
       text-align: center;
       font-family: 'Funkis A', sans-serif;
       color: var(--off-black);
+      display: flex;
+      flex-direction: column;
+      gap: 2.017cqw;
     }
     .reward-terms-headline {
       font-weight: 700;
-      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
-      margin: 0 0 0.35rem;
+      font-size: 4.034cqw;
+      line-height: normal;
+      margin: 0;
     }
     .reward-terms-line {
-      font-size: clamp(0.8rem, 1.05vw, 0.95rem);
-      line-height: 1.4;
-      margin: 0.1rem 0;
+      font-size: 2.689cqw;
+      line-height: normal;
+      margin: 0;
     }
 
+    /* CTA stack — Figma: bottom: 60px, left: 173px (centered), width: 248px,
+       gap: 18px. Button is 100% of stack. Copy code is a plain underlined link. */
     .reward-cta-stack {
-      margin-top: auto;
+      position: absolute;
+      bottom: 7.13cqh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 41.68cqw;
+      margin: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(0.6rem, 1.5vh, 1.1rem);
+      gap: 2.137cqh;
     }
 
     .cta-btn {
+      width: 100%;
+      box-sizing: border-box;
       background: var(--black);
       color: var(--white);
       border: none;
-      padding: clamp(0.7rem, 1.4vh, 0.9rem) clamp(1.6rem, 3vw, 2.5rem);
+      padding: 2.017cqw 4.034cqw;
       font-family: 'Funkis A', 'DM Sans', sans-serif;
-      font-size: clamp(0.85rem, 1.1vw, 1rem);
+      font-size: 4.034cqw;
       font-weight: 700;
       cursor: pointer;
       text-decoration: none;
-      display: inline-block;
-      border-radius: 3px;
+      text-align: center;
+      display: block;
+      border-radius: 2.5px;
       transition: background 0.2s, transform 0.1s;
     }
     .cta-btn:hover { background: var(--ink); transform: translateY(-1px); }
@@ -1001,11 +1049,11 @@
       color: var(--off-black);
       font-family: 'Funkis A', sans-serif;
       font-weight: 700;
-      font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+      font-size: 2.689cqw;
       text-decoration: underline;
       text-underline-offset: 2px;
       cursor: pointer;
-      padding: 0.25rem 0.5rem;
+      padding: 0;
       transition: color 0.15s ease;
     }
     .reward-copy-link:hover { color: #555; }

@@ -1319,17 +1319,33 @@
       const dishImg = section.querySelector('[data-img]');
       const browseBtn = section.querySelector('.cta-browse');
 
-      // Reveal on scroll-into-view, then auto-advance from stacked to exploded.
-      const io = new IntersectionObserver((entries) => {
+      // Heading + cards fade in once the section is in view; this latches and
+      // doesn't toggle off (the heading shouldn't blink as you scroll past).
+      const headingIo = new IntersectionObserver((entries) => {
         for (const e of entries) {
-          if (e.isIntersecting && !section.classList.contains('in-view')) {
+          if (e.isIntersecting) {
             section.classList.add('in-view');
-            setTimeout(() => section.classList.add('state-exploded'), 850);
-            io.disconnect();
+            headingIo.disconnect();
+            break;
           }
         }
-      }, { threshold: 0.3 });
-      io.observe(section);
+      }, { threshold: 0.15 });
+      headingIo.observe(section);
+
+      // Stack ↔ exploded follows the scroll position: as the section's top
+      // rises past ~45% of the viewport, cards fan out; if you scroll back
+      // up past that line, they collapse back into the stack. While the
+      // user is in the click-to-detail view, leave the state alone so a
+      // small scroll doesn't shove them out of the recipe they just opened.
+      const updateStackState = () => {
+        if (section.classList.contains('state-detail')) return;
+        const rect = section.getBoundingClientRect();
+        const triggerY = window.innerHeight * 0.45;
+        section.classList.toggle('state-exploded', rect.top < triggerY);
+      };
+      window.addEventListener('scroll', updateStackState, { passive: true });
+      window.addEventListener('resize', updateStackState);
+      updateStackState();
 
       cards.forEach(card => {
         card.addEventListener('click', () => {
